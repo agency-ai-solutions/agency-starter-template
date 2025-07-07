@@ -1,0 +1,37 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Test and development artifacts
+src/tests/
+*.log
+*.tmp
+
+# Distribution/build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+*.bak
+
+# Docker and Compose files (not needed in image)
+Dockerfile
+docker-compose.yml
