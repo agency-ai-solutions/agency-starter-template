@@ -50,3 +50,7 @@ Default: `"512"`.
 ### `cpu_limit` (string)
 CPU allocation (`"1"` = 1 core, `"0.5"` = half core, available cores are from 0.5 to 8).
 Default: `"1"`.
+
+### `app_token_env` (string)
+Environment variable name for the app token used for agency fastapi.
+Default: `""`.
