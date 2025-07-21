@@ -1,13 +1,8 @@
 {
   "name": "ExampleAgency",
-  "logo_url": "",
   "description": "A full agency with containerized agents that can be deployed to Agencii",
   "version": "1.0.0",
   "auto_deploy": true,
-  "first_run": true,
-  "github_integration": {
-    "enabled": true
-  },
   "deployment_settings": {
     "port": 8080
   },

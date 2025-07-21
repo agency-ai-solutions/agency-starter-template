@@ -6,9 +6,6 @@
 Display name for the agency.
 Default: agency folder name.
 
-### `logo_url` (string)
-Optional URL to display a logo in dashboards.
-
 ### `description` (string)
 Short summary for humans.
 
@@ -20,24 +17,7 @@ Default: `"1.0.0"`.
 If `true`, the agent will deploy automatically on repo push.
 Default: `true`.
 
-### `first_run` (boolean)
-Used internally to detect first launch. Can be omitted by users.
-Default: `true`.
----
-
-## `github_integration` (object)
-
-### `enabled` (boolean)
-Whether to sync this repo with a GitHub App.
-Default: `true`.
-
-### `main_branch` (string)
-Which branch triggers deploys. Usually `"main"` or `"master"`.
-Default: `"main"`.
-
----
-
-## `deployment_settings` (object)
+### `deployment_settings` (object)
 
 ### `lifecycle_timeout` (int)
 Total seconds an agent is allowed to stay alive. Use 0 for no timeout.
