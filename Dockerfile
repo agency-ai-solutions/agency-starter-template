@@ -9,7 +9,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Only copy requirements for better layer caching
-COPY src/requirements.txt .
+COPY requirements.txt .
 
 # Upgrade pip and install requirements into /install
 RUN pip install --upgrade pip && \
@@ -21,14 +21,15 @@ FROM python:3.13-slim
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-WORKDIR /app/src
+WORKDIR /app
 
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
 # Copy source code
-COPY src/ .
+COPY ./ .
 
 EXPOSE 8080
 
 CMD ["python", "-u", "main.py"]
+    
