@@ -262,7 +262,7 @@ Best practices:
 Alternatively to creating custom tools, you can use special MCP servers which already contain predefined tools. In this case, you don't need to create custom tool files for the same functionality or add them to the PRD. You can use MCPs interchangeably with custom tools
 
 ```python
-from agency_swarm.tools.mcp import MCPServerStdio
+from agents.mcp import MCPServerStdio
 
 filesystem_server = MCPServerStdio(
     # This name determines how the agent accesses the tools (e.g., Filesystem_Server.list_files)
@@ -276,6 +276,18 @@ filesystem_server = MCPServerStdio(
 # Attach this server to your Agent via the mcp_servers list:
 # my_agent = Agent(..., mcp_servers=[sse_server])
 # Reference: https://agency-swarm.ai/core-framework/tools/mcp-integration#step-2-define-sse-server-connection-optional
+```
+
+For remote MCP servers, you can use the `MCPServerSse` or `MCPServerStreamableHttp` classes.
+
+### Web Search Tool (Built-in)
+
+Agency Swarm has a built-in tool for web searchs. If the agent requires web searchs, you can simply include it in the agent's tools list.
+
+```python
+from agents.tool import WebSearchTool
+
+tools = [WebSearchTool()]
 ```
 
 # Step 4: Agent Creation
@@ -295,10 +307,9 @@ To create an agent:
        description="Responsible for client communication, task planning and management.",
        instructions="./instructions.md",
        tools_folder="./tools",
+       model="gpt-5",
        model_settings=ModelSettings(
-           model="gpt-4o",
-           temperature=0.5,
-           max_completion_tokens=25000,
+           max_tokens=25000,
        ),
    )
    ```
