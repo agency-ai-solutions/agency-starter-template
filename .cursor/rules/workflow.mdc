@@ -140,33 +140,7 @@ Follow this folder structure when further creating or modifying any files.
 
 # Step 3: Tool Creation
 
-Tools are the specific actions that agents can perform. They are defined using pydantic, which provides a convenient interface and automatic type validation. In v1.x you may also use the `@function_tool` decorator to define tools as simple functions. To create a tool:
-
-1. Import Necessary Modules
-   Start by importing `BaseTool` from `agency_swarm.tools` and `Field` from `pydantic`. These imports will serve as the foundation for your custom tool class. Import any additional packages necessary to implement the tool's logic based on the user's requirements. Import `load_dotenv` from `dotenv` to load the environment variables.
-
-2. Define Your Tool Class and Docstring
-   Create a new class that inherits from `BaseTool`. Write a clear docstring describing the tool's purpose. This docstring is crucial as it helps agents understand how to use the tool. `BaseTool` extends `BaseModel` from pydantic.
-
-3. Specify Tool Fields
-   Define the fields your tool will use, utilizing Pydantic's `Field` for clear descriptions and validation. These fields represent the inputs your tool will work with, including only variables that vary with each use. Define any constant variables globally.
-
-4. Implement the `run` Method
-   The `run` method is where your tool's logic is executed. Use the fields defined earlier to perform the tool's intended task. It must contain the actual fully functional correct python code. It can utilize various python packages, previously imported in step 1.
-
-5. Test the Tool
-   Add a test case at the bottom of the file in if **name** == "**main**": block. It will be used to test the tool later.
-
-### Best Practices
-
-- **Use Python Packages**: Prefer to use various API wrapper packages and SDKs available on pip, rather than calling these APIs directly using requests.
-- **Documentation**: The documentation should clearly describe the purpose and functionality of the tool, as well as how to use it.
-- **Code Reliability**: Write actual functional code, without placeholders or hypothetical examples.
-- **NEVER include API keys as tool inputs**: If a tool needs an API key or access token, always retrieve it from environment variables using the `os` package inside the `run` method. Do not define API keys or tokens as input fields for the tool.
-- **Use global variables for constants**: If a tool requires a constant value that doesn't change from use to use (for example, `ad_account_id`, `pull_request_id`, etc.), define it above the tool function instead of passing it as a parameter.
-- **Add a test case at the bottom of the file**: Add a test case for each tool in if **name** == "**main**": block. It will be used to test the tool later.
-
-### Complete Example of a Tool File
+Tools are the specific actions that agents can perform. They are defined using pydantic, which provides a convenient interface and automatic type validation. Below is a complete example of a tool file:
 
 ```python
 # MyCustomTool.py
@@ -207,28 +181,19 @@ if __name__ == "__main__":
     print(tool.run())
 ```
 
-### Using `function_tool` Decorator
-
-Alternatively, tools can be implemented as simple functions using the `@function_tool` decorator from the `agents` package.
-
-```python
-from agents import function_tool
-import os
-from dotenv import load_dotenv
-
-load_dotenv()  # always load environment variables
-
-@function_tool
-def my_custom_tool(example_field: str) -> str:
-    """A brief description of what the custom tool does."""
-    # Your custom tool logic goes here
-    return f"Result: {example_field}"
-
-if __name__ == "__main__":
-    print(my_custom_tool("example value"))
-```
-
 Remember, each tool code snippet you create must be IMMIDIATELY ready to use by the user. It must not contain any mocks, placeholders or hypothetical examples.
+
+### Best Practices
+
+- **Use Python Packages**: Prefer to use various API wrapper packages and SDKs available on pip, rather than calling these APIs directly using requests.
+- **Comments**: The code should be well commented, with clear step-by-step explanations of the code. (Eg. "# Step 1: Do something", "# Step 2: Do something else", etc.)
+- **Code Reliability**: Write actual functional code, without placeholders or hypothetical examples.
+- **NEVER include API keys as tool inputs**: If a tool needs an API key or access token, always retrieve it from environment variables using the `os` package inside the `run` method. Do not define API keys or tokens as input fields for the tool.
+- **Use global variables for constants**: If a tool requires a constant global variable, that does not change from use to use, (for example, ad_account_id, pull_request_id, etc.), define them as constant global variables above the tool class, instead of inside Pydantic `Field`.
+- **Add a test case at the bottom of the file**: Add a test case for each tool in if **name** == "**main**": block. It will be used to test the tool later.
+- **4-16 Tools Per Agent**: Each agent should have between 4 and 16 tools. Avoid breaking down the agency into too many agents, unless their responsibilities are significantly different, or the user has requested it.
+- **Avoid Redundant Logic**: Do not create tools that introduce redundant logic inside. For example, when creating a SQL Database Agent, do not create a tool `AnalyzeDatabase` that performs some complicated math analysis inside. Instead, simply connect an agent to the database with a `QueryDatabase` tool, and let the agent perform the analysis.
+- **Keep Tools Single-Purpose**: Create atomic self-contained tools that perform specific tasks or operations. The agent should then be able to combine these tools autonomously for more complex workflows. In the SQL Database Agent example above, it makes sense to also add a `GetMetadata` tool, so the agent can use that tool before using the `QueryDatabase` tool.
 
 ### Agency Context (Shared State)
 
