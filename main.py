@@ -17,4 +17,5 @@ if __name__ == "__main__":
             "my-agency": create_agency,
         },
         port=8080,
+        enable_logging=True
     )
