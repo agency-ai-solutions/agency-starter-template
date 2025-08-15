@@ -18,6 +18,11 @@ RUN pip install --upgrade pip && \
 # -------- Stage 2: Runtime --------
 FROM python:3.13-slim
 
+# Install e2fs-progs for chattr command required by for provisioning
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends e2fsprogs && \
+    rm -rf /var/lib/apt/lists/*
+
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
