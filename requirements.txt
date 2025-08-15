@@ -1,3 +1,8 @@
  git+https://github.com/bonk1t/agency-swarm.git@dev/migrate-to-responses-api-agents-sdk#egg=agency-swarm[fastapi]
 fastapi
 uvicorn
+psycopg2-binary
+sqlalchemy
+pandas
+mem0ai
+python-dotenv
