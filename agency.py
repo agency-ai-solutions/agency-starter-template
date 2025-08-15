@@ -8,6 +8,8 @@ import asyncio
 
 load_dotenv()
 
+# do not remove this method, agency.py **must** expose a create_agency method
+# this method is used on the server to deploy the agency
 def create_agency(load_threads_callback=None):
     agent = ExampleAgent()
     agent2 = ExampleAgent2()
