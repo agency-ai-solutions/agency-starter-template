@@ -1,3 +1,8 @@
 agency-swarm[fastapi]==1.0.0
 fastapi
 uvicorn
+psycopg2-binary
+sqlalchemy
+pandas
+mem0ai
+python-dotenv
