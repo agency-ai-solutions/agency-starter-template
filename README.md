@@ -63,7 +63,7 @@ agency-github-template/
     ├── example_agent.py
     ├── instructions.md
     └── tools/
-        └── example_tool.py
+        └── ExampleTool.py
 ├── example_agent2/
 ├── agency_manifesto.md  # Shared instructions
 ├── requirements.txt
