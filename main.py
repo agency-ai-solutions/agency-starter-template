@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.INFO)
 if __name__ == "__main__":
     run_fastapi(
         agencies={
+            # you must export your create agency function here
             "my-agency": create_agency,
         },
         port=8080,

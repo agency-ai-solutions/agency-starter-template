@@ -58,18 +58,17 @@ agency-github-template/
 ├── requirements.txt          # Python dependencies
 ├── Dockerfile               # Container configuration
 ├── .env                     # Environment variables (create this)
-└── ExampleAgency/           # Your agency folder
-    ├── agency_manifesto.md  # Shared instructions
-    ├── ExampleAgent/        # First agent
-    │   ├── ExampleAgent.py
-    │   ├── instructions.md
-    │   └── tools/
-    │       └── ExampleTool.py
-    └── ExampleAgent2/       # Second agent
-        ├── ExampleAgent2.py
-        ├── instructions.md
-        └── tools/
-            └── ExampleTool.py
+├── example_agent/           # Your agency folder
+    ├── __init__.py
+    ├── example_agent.py
+    ├── instructions.md
+    └── tools/
+        └── example_tool.py
+├── example_agent2/
+├── agency_manifesto.md  # Shared instructions
+├── requirements.txt
+├── .env
+└──...
 ```
 
 ---
@@ -86,22 +85,24 @@ This template includes **AI-powered agency creation** using Cursor IDE:
    ```
    📁 .cursor/rules/workflow.mdc
    ```
-   
-3. **Simply ask the AI:** 
+3. **Simply ask the AI:**
+
    > "Create a new agency using the .cursor workflow"
-   
+
    The AI will guide you through the complete 7-step process:
-   - ✅ PRD Creation  
+
+   - ✅ PRD Creation
    - ✅ Folder Structure Setup
    - ✅ Tool Development
    - ✅ Agent Creation
-   - ✅ Agency Configuration  
+   - ✅ Agency Configuration
    - ✅ Testing & Validation
    - ✅ Iteration & Refinement
 
 ### 📋 **What the AI Will Do For You**
 
 The AI assistant will automatically:
+
 - Create proper folder structures
 - Generate agent classes and instructions
 - Build custom tools with full functionality
@@ -133,25 +134,28 @@ Your agency must follow this structure:
 For production deployment, use the [Agencii](https://agencii.ai/) platform:
 
 #### **Step 1: Create Account & Use Template**
+
 1. **Sign up** at [agencii.ai](https://agencii.ai/)
 2. **Use this template** to create your repository
 3. **Develop your agency** using Cursor IDE with `.cursor` workflow
 
 #### **Step 2: Install GitHub App**
-1. **Install** the [Agencii GitHub App](https://github.com/apps/agencii) 
+
+1. **Install** the [Agencii GitHub App](https://github.com/apps/agencii)
 2. **Grant permissions** to your repository
 3. **Configure** environment variables in Agencii dashboard
 
 #### **Step 3: Deploy**
+
 1. **Push to main branch** - Agencii automatically detects and deploys
 2. **Monitor deployment** in your Agencii dashboard
 3. **Access your live agency** via provided endpoints
 
 ### **🔄 Automatic Deployments**
-- **Auto-deploy** on every push to `main` branch
-- **Zero-downtime** deployments with rollback capability  
-- **Environment management** through Agencii dashboard
 
+- **Auto-deploy** on every push to `main` branch
+- **Zero-downtime** deployments with rollback capability
+- **Environment management** through Agencii dashboard
 
 ---
 
@@ -160,7 +164,7 @@ For production deployment, use the [Agencii](https://agencii.ai/) platform:
 ### **🎯 Recommended: AI-Assisted Development**
 
 1. **Open Cursor IDE** with this template
-2. **Ask the AI**: *"Create a new agency using the .cursor workflow"*
+2. **Ask the AI**: _"Create a new agency using the .cursor workflow"_
 3. **Follow the guided process** - the AI handles everything automatically
 4. **Test your agency**: `python agency.py`
 5. **Deploy to production**: Install [Agencii GitHub App](https://github.com/apps/agencii) and push to main
@@ -170,8 +174,8 @@ For production deployment, use the [Agencii](https://agencii.ai/) platform:
 If you prefer hands-on development:
 
 1. **Create Tools**: Build agent tools in `tools/` folders
-2. **Configure Agents**: Write `instructions.md` and agent classes  
-3. **Test Locally**: Run `python agency.py` 
+2. **Configure Agents**: Write `instructions.md` and agent classes
+3. **Test Locally**: Run `python agency.py`
 4. **Deploy**: Push to your preferred platform
 
 The `.cursor/rules/workflow.mdc` file contains the complete development specifications for manual implementation.
@@ -180,7 +184,7 @@ The `.cursor/rules/workflow.mdc` file contains the complete development specific
 
 ## 📚 Key Features
 
-- **🌐 Agencii Cloud Deploy**: One-click deployment to [Agencii platform](https://agencii.ai/) 
+- **🌐 Agencii Cloud Deploy**: One-click deployment to [Agencii platform](https://agencii.ai/)
 - **🤖 AI-Assisted Creation**: Built-in Cursor IDE workflow for automated agency development
 - **🔄 Auto-Deploy**: Automatic deployment on push to main branch
 - **🚀 Ready-to-Deploy**: Dockerfile and requirements included
@@ -212,7 +216,7 @@ The `.cursor/rules/workflow.mdc` file contains the complete development specific
 ## ⚡ Quick Tips
 
 - **Start Small**: Begin with 1-2 agents and expand
-- **Test Tools**: Each tool should work independently  
+- **Test Tools**: Each tool should work independently
 - **Clear Instructions**: Write detailed agent instructions
 - **Environment Setup**: Always use `.env` for API keys
 - **Documentation**: Update instructions as you develop
@@ -222,13 +226,14 @@ The `.cursor/rules/workflow.mdc` file contains the complete development specific
 **Ready to build your AI agency?** 🤖✨
 
 ### 🌐 **Production Route (Recommended)**
-1. **Sign up** at [agencii.ai](https://agencii.ai/)
-2. **Use this template** to create your repository  
-3. **Install** [Agencii GitHub App](https://github.com/apps/agencii)
-4. **Push to main** → Automatic deployment! 
 
-### 🛠️ **Development Route**  
+1. **Sign up** at [agencii.ai](https://agencii.ai/)
+2. **Use this template** to create your repository
+3. **Install** [Agencii GitHub App](https://github.com/apps/agencii)
+4. **Push to main** → Automatic deployment!
+
+### 🛠️ **Development Route**
+
 Open this template in **Cursor IDE** and ask the AI to create your agency using the `.cursor` workflow. The AI will handle everything from setup to testing automatically!
 
 For manual development, replace the `ExampleAgency` with your own implementation and start deploying intelligent agent systems!
-

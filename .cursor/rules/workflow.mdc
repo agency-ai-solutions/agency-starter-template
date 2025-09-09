@@ -89,24 +89,23 @@ Repeat this step for each agent in the agency. Make sure to correctly specify th
 After creating the templates, the folder structure is organized as follows:
 
 ```
-agency_name/
-├── agent_name/
+├── example_agent/
 │   ├── __init__.py
-│   ├── agent_name.py
+│   ├── example_agent.py
 │   ├── instructions.md
 │   └── tools/
-│       ├── tool_name1.py
-│       ├── tool_name2.py
-│       ├── tool_name3.py
+│       ├── ToolName.py
+│       ├── ToolName2.py
+│       ├── ToolName3.py
 │       ├── ...
-├── another_agent/
+├── example_agent2/
 │   ├── __init__.py
-│   ├── another_agent.py
+│   ├── example_agent2.py
 │   ├── instructions.md
 │   └── tools/
-│       ├── tool_name1.py
-│       ├── tool_name2.py
-│       ├── tool_name3.py
+│       ├── ToolName.py
+│       ├── ToolName2.py
+│       ├── ToolName3.py
 │       ├── ...
 ├── agency.py
 ├── agency_manifesto.md

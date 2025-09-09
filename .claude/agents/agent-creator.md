@@ -22,15 +22,14 @@ Agency Swarm v1.0.0 uses the OpenAI Agents SDK. Agents are instantiated directly
 ## Exact Folder Structure (v1.0.0)
 
 ```
-agency_name/
-├── agent_name/
+├── example_agent/
 │   ├── __init__.py
 │   ├── agent_name.py       # Agent instantiation
 │   ├── instructions.md     # Placeholder for instructions-writer
 │   └── tools/              # For tools-creator to populate
-├── another_agent/
+├── example_agent2/
 │   ├── __init__.py
-│   ├── another_agent.py
+│   ├── example_agent2.py
 │   ├── instructions.md
 │   └── tools/
 ├── agency.py               # Main agency file
@@ -39,13 +38,13 @@ agency_name/
 └── .env                   # API keys template
 ```
 
-## Agent Module Template (agent_name.py)
+## Agent Module Template (example_agent.py)
 
 ```python
 from agents import ModelSettings
 from agency_swarm import Agent
 
-agent_name = Agent(
+example_agent = Agent(
     name="AgentName",
     description="[Agent role from PRD]",
     instructions="./instructions.md",
@@ -61,9 +60,9 @@ agent_name = Agent(
 ## Agent **init**.py Template
 
 ```python
-from .agent_name import agent_name
+sfrom .example_agent import example_agent
 
-__all__ = ["agent_name"]
+__all__ = ["example_agent"]
 ```
 
 ## Agency.py Template
@@ -133,7 +132,7 @@ OPENAI_API_KEY=
 2. Create main agency folder
 3. For each agent in PRD:
    - Create agent folder with exact structure
-   - Create agent_name.py with Agent instantiation (not subclass)
+   - Create example_agent.py with Agent instantiation (not subclass)
    - Use snake_case for instance names, PascalCase for Agent name parameter
    - Create **init**.py for imports
    - Create empty tools/ folder (tools-creator will populate)
@@ -153,7 +152,7 @@ OPENAI_API_KEY=
 **agent-creator owns**:
 
 - All folders structure
-- agent_name.py files
+- example_agent.py files
 - **init**.py files
 - agency.py (skeleton)
 - agency_manifesto.md
@@ -175,7 +174,7 @@ OPENAI_API_KEY=
 Report back:
 
 - Agency created at: `agency_name/`
-- Agent modules created: [list of agent_name.py files]
+- Agent modules created: [list of example_agent.py files]
 - Folder structure ready for tools and instructions
 - Base requirements.txt created
 - .env template ready for API keys

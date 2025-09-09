@@ -1,21 +1,19 @@
 from dotenv import load_dotenv
 from agency_swarm import Agency
 
-from ExampleAgency.ExampleAgent.ExampleAgent import ExampleAgent
-from ExampleAgency.ExampleAgent2.ExampleAgent2 import ExampleAgent2
+from example_agent import example_agent
+from example_agent2 import example_agent2
 
 import asyncio
 
 load_dotenv()
 
-# do not remove this method, agency.py **must** expose a create_agency method
-# this method is used on the server to deploy the agency
+# do not remove this method, it is used in the main.py file to deploy the agency (it has to be a method)
 def create_agency(load_threads_callback=None):
-    agent = ExampleAgent()
-    agent2 = ExampleAgent2()
     agency = Agency(
-        agent, agent2,
-        communication_flows=[(agent, agent2)],
+        example_agent, example_agent2,
+        communication_flows=[(example_agent, example_agent2)],
+        name="ExampleAgency", # don't forget to rename your agency!
         shared_instructions="agency_manifesto.md",
         load_threads_callback=load_threads_callback,
     )
