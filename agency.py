@@ -14,7 +14,7 @@ def create_agency(load_threads_callback=None):
         example_agent, example_agent2,
         communication_flows=[(example_agent, example_agent2)],
         name="ExampleAgency", # don't forget to rename your agency!
-        shared_instructions="agency_manifesto.md",
+        shared_instructions="shared_instructions.md",
         load_threads_callback=load_threads_callback,
     )
 
