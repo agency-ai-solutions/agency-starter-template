@@ -23,6 +23,12 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends e2fsprogs && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -33,6 +39,9 @@ COPY --from=builder /install /usr/local
 
 # Copy source code
 COPY ./ .
+
+# Initialize and update git submodules
+RUN git submodule update --init --recursive
 
 EXPOSE 8080
 
