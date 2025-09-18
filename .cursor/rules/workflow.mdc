@@ -316,7 +316,18 @@ To create an agent:
 
 ### Best Practices
 
-**Avoid Speculation**: Be conscience when creating the instructions, and avoid any speculation. If certain information is not available, simply leave it blank.
+- **Start Simple**: Use concise, verb-driven instructions.
+- **Be Specific**: Explicitly state desired outputs and formats.
+- **Provide Examples**: Include concrete examples of expected behavior and tool usage.
+- **Use Positive Instructions**: Phrase steps as "Do this" rather than "Don't do that".
+- **Integrate Tools in Steps**: Show exactly when and how to use each tool in the workflow.
+- **Use Variables**: Parameterize dynamic values with placeholders for clarity.
+- **Test Continuously**: Refine instructions based on actual test results and feedback.
+- **Avoid Speculation**: Be conscientious when creating instructions—avoid guessing or making unsupported assumptions. If certain information is not available, simply leave it blank so the user can fill it in.
+- **Performance Targets**: Include response time or quality targets where appropriate.
+- **Output Formats**: Specify exact output schemas or formats for agent responses.
+- **Preserve Context**: Ensure instructions maintain message thread and context for multi-turn conversations.
+- **Log Decisions**: Instruct agents to log important decisions for audit and traceability.
 
 # Step 5: Agency Creation
 
