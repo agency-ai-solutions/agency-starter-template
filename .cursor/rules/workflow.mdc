@@ -3,7 +3,7 @@ description: AI Agent Creator Instructions for Agency Swarm Framework
 alwaysApply: true
 ---
 
-Agency Swarm **v1.0.0** is the latest version of the framework built on the OpenAI Agents SDK. It allows anyone to create a collaborative swarm of agents (Agencies), each with distinct roles and capabilities. Your primary role is to architect tools and agents that fulfill specific needs within the agency. Helpful references for building agents include:
+Agency Swarm **v1.0.1** is the latest version of the framework built on the OpenAI Agents SDK. It allows anyone to create a collaborative swarm of agents (Agencies), each with distinct roles and capabilities. Your primary role is to architect tools and agents that fulfill specific needs within the agency. Helpful references for building agents include:
 
 - Official docs: <https://agency-swarm.ai>
 - Source code: <https://github.com/VRSEN/agency-swarm>
@@ -78,7 +78,7 @@ After the user provides the requested details, proceed to drafting the PRD file 
 ### Best Practices
 
 - **Each tool must perform a specific realistic task**: Do not create tools that do not correspond to real world tasks. Each tool should focus on a specific action a human typically would perform. For example, "FetchLeadsFromInstagram" is a valid tool, but "OptimizeEmailSubject" is not. Optimizing email subjects is not a real task. Typically, a tool either: 1) connects to an external API, 2) performs a specific action on local files, 3) uses AI inside.
-- **At most 4-16 Tools Per Agent**: Each agent should have between 4 and 16 tools. Avoid breaking down the agency into too many agents, unless their responsibilities are significantly different, or the user has requested it. **Avoid creating tools that the user has not requested.** If it's unclear what tools the agent will need, ask the user for clarification or continue without them.
+- **4-16 Tools Per Agent**: Each agent should have between 4 and 16 tools. Avoid breaking down the agency into too many agents, unless their responsibilities are significantly different, or the user has requested it. **Avoid creating tools that the user has not requested.** If it's unclear what tools the agent will need, ask the user for clarification or continue without them. Note: Each MCP typically contains multiple tools. Count each as 5-10 tools, depending on MCP complexity and capabilities.
 - **Ask for API keys before creating any tools**: If a tool requires an API key or access token, ask the user to add it to the .env file. Do not proceed with creating the tool until the API key is added, otherwise you will not be able to test them.
 
 # Step 2: Folder Structure and Template Creation
@@ -132,7 +132,7 @@ The basic folder structure is already created for you:
 - Agency Configuration:
   - The 'agency.py' file is the main file where all new agents are imported.
   - When creating a new agency folder, use descriptive names, like for example: marketing_agency, development_agency, etc.
-  - Create a `.env` file in the agency folder and add a placeholder for `OPENAI_API_KEY` and any other API keys that are required by the tools.
+  - Create a `.env` file in the root folder and add a placeholder for `OPENAI_API_KEY` and any other API keys that are required by the tools for the user to fill in.
 
 Follow this folder structure when further creating or modifying any files. Replace example_agent folders with the actual agents when creating agents for the first time.
 
@@ -189,7 +189,6 @@ Remember, each tool code snippet you create must be IMMIDIATELY ready to use by 
 - **NEVER include API keys as tool inputs**: If a tool needs an API key or access token, always retrieve it from environment variables using the `os` package inside the `run` method. Do not define API keys or tokens as input fields for the tool.
 - **Use global variables for constants**: If a tool requires a constant global variable, that does not change from use to use, (for example, ad_account_id, pull_request_id, etc.), define them as constant global variables above the tool class, instead of inside Pydantic `Field`.
 - **Add a test case at the bottom of the file**: Add a test case for each tool in if **name** == "**main**": block. It will be used to test the tool later.
-- **4-16 Tools Per Agent**: Each agent should have between 4 and 16 tools. Avoid breaking down the agency into too many agents, unless their responsibilities are significantly different, or the user has requested it.
 - **Avoid Redundant Logic**: Do not create tools that introduce redundant logic inside. For example, when creating a SQL Database Agent, do not create a tool `AnalyzeDatabase` that performs some complicated math analysis inside. Instead, simply connect an agent to the database with a `QueryDatabase` tool, and let the agent perform the analysis.
 - **Keep Tools Single-Purpose**: Create atomic self-contained tools that perform specific tasks or operations. The agent should then be able to combine these tools autonomously for more complex workflows. In the SQL Database Agent example above, it makes sense to also add a `GetMetadata` tool, so the agent can use that tool before using the `QueryDatabase` tool.
 
@@ -198,14 +197,14 @@ Remember, each tool code snippet you create must be IMMIDIATELY ready to use by 
 Agency context lets your tools and agents share data without passing it in conversation messages.
 
 ```python
-from agents import function_tool, RunContextWrapper
-from agency_swarm.context import MasterContext
+from agency_swarm.tools import BaseTool
 
-@function_tool
-async def my_tool(ctx: RunContextWrapper[MasterContext], arg1: str) -> str:
-    ctx.context.set("my_key", arg1)            # Store data
-    data = ctx.context.get("my_key", "default")  # Retrieve data
-    return data
+class MyTool(BaseTool):
+    value: str = Field(..., description="The value to store in the context")
+    def run(self):
+        self._context.set("my_key", self.value)
+        data = self._context.get("my_key", "default")
+        return data
 ```
 
 Use agency context for:
@@ -259,9 +258,7 @@ tools = [WebSearchTool()]
 
 To create an agent:
 
-1. **Create an agent module.**
-
-   In v1.x you instantiate `Agent` directly rather than subclassing. Create a Python file (e.g., `ceo.py`) and instantiate the agent as follows:
+1. **Create an agent module.**:
 
    ```python
    from agents import ModelSettings
@@ -331,11 +328,9 @@ To create an agent:
 
 # Step 5: Agency Creation
 
-Agencies are collections of agents that work together to achieve a common goal. They are defined in the `agency.py` file, which you need to create in the agency folder.
+Agencies are collections of agents that work together to achieve a common goal. They are defined in the `agency.py` file, which already exists in the root folder.
 
-1. **Create an `agency.py` file in the agency folder.**
-
-   Import `Agency` from `agency_swarm` and instantiate it with your agents. The first argument is the entry point for user communication.
+1. **Import the agents into the `agency.py` file.**
 
    ```python
    from dotenv import load_dotenv
@@ -353,24 +348,22 @@ Agencies are collections of agents that work together to achieve a common goal. 
            (ceo, virtual_assistant),
            (developer, virtual_assistant),
        ],
-       shared_instructions="agency_manifesto.md",
+       shared_instructions="shared_instructions.md",
    )
 
    if __name__ == "__main__":
        agency.run_demo()
    ```
 
+   The first argument is the entry point for user communication. The communication flows are defined in the `communication_flows` parameter.
+
    **A Note on Communication Flows**:
 
    Communication flows are directional. In the `communication_flows` parameter above, the agent on the left can initiate conversations with the agent on the right.
 
-2. **Define the `agency_manifesto.md` file.**
+2. **Define the `shared_instructions.md` file.**
 
-   Agency manifesto is a file that contains shared instructions for all agents in the agency. It is a markdown file that is located in the agency folder. Please write the manifesto file when creating a new agency. Include the following details:
-
-   - **Agency Description**: A brief description of the agency.
-   - **Mission Statement**: A concise statement that encapsulates the purpose and guiding principles of the agency.
-   - **Context**: Additional information provided by the user. For example, their preferences, business details, personal information, etc.
+   Shared instructions is a file that contains shared instructions for all agents in the agency. Typically, this file might contain information about the business, ICP, target audience, environment, etc. If user has not provided any information, create a template with headings but leave the content blank for the user to fill in.
 
 # Step 6: Testing
 
@@ -379,13 +372,13 @@ The final step is to test each tool and the agency itself, to ensure they are wo
 1. First, install the dependencies for the agency using the following command:
 
    ```bash
-   pip install -r agency_name/requirements.txt
+   pip install -r requirements.txt
    ```
 
 2. Then, run each tool file in the tools folder that you created, to ensure they are working as expected.
 
    ```bash
-   python agency_name/agent_name/tools/tool_name.py
+   python agent_name/tools/tool_name.py
    ```
 
    If any of the tools return an error, you need to fix the code in the tool file.
@@ -393,24 +386,22 @@ The final step is to test each tool and the agency itself, to ensure they are wo
 3. Once all tools are working as expected, you can test the agency by running the following command:
 
    ```bash
-   python agency_name/agency.py
+   python agency.py
    ```
 
    If the terminal demo runs successfully, you have successfully created an agency that works as expected.
 
-**Important**: Please do not stop until all new tools and agents have been tested and are working as expected. Do not ask for confirmation or wait for the user to respond. Just keep iterating until the agency performs as expected.
+**Important**: Please do not stop on this step until all new tools and agents have been tested and are working as expected. Do not ask for confirmation or wait for the user to respond. Just keep iterating until the agency performs as expected.
 
 # Step 7: Iteration
 
 Repeat the above steps as instructed by the user, until the agency performs consistently to the user's satisfaction. First, adjust the tools, then adjust the agents and instructions, then test again. Make sure to repeat each step accordingly.
 
+If the user is not starting their agency from scratch, you can start from one of the steps above accordingly.
+
 # Final Notes
 
-- NEVER output code snippets or file contents in the chat. Always create or modify the actual files in the file system. If you're unsure about a file's location or content, check the current folder structure and file contents before proceeding. If you find yourself about to output code in the chat, STOP and reconsider your approach.
-
-- When creating or modifying files:
-
-1. Use the appropriate file creation or modification syntax (e.g., ```python:path/to/file.py for Python files).
-2. Write the full content of the file, not just snippets or placeholders.
-3. Ensure all necessary imports and dependencies are included.
-4. Follow the specified file creation order rigorously: 1. tools, 2. agents, 3. agency, 4. requirements.txt.
+1. NEVER output code snippets or file contents in the chat. Always create or modify the actual files in the file system. If you're unsure about a file's location or content, check the current folder structure and file contents before proceeding. If you find yourself about to output code in the chat, STOP and reconsider your approach.
+2. Never create files with sample snippets, hypothetical examples or placeholders. When creating custom tools, you must create production-ready functional code.
+3. Ensure all tools are properly tested before submitting your work to the user.
+4. Follow the specified file creation order rigorously: 1. requirements.txt, 2. tools, 3. agents, 4. instructions.md. 5. agency.py.
