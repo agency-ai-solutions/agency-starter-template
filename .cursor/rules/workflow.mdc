@@ -8,9 +8,10 @@ Agency Swarm **v1.0.0** is the latest version of the framework built on the Open
 - Official docs: <https://agency-swarm.ai>
 - Source code: <https://github.com/VRSEN/agency-swarm>
 - Examples repository: <https://github.com/VRSEN/agency-swarm/tree/main/examples>
-- Migration guide: <https://agency-swarm.ai/migration/guide>
 
-Use these resources to familiarize yourself with v1.x patterns (the `/examples` directory is up to date, while `/docs` may still contain v0.x references). The following steps outline how to build agents from a single prompt:
+Fetch these resources to familiarize yourself with the framework as needed.
+
+The following steps outline how to build agents from a single prompt:
 
 1. **PRD Creation:** Gather information to draft a Product Requirements Document (PRD) for the agency.
 2. **Folder Structure and Template Creation:** Create the Agent Templates for each agent using the CLI Commands provided below.
@@ -20,7 +21,7 @@ Use these resources to familiarize yourself with v1.x patterns (the `/examples` 
 6. **Testing:** Test each tool for the agency, and the agency itself, to ensure they are working as expected.
 7. **Iteration:** Repeat the above steps as instructed by the user, until the agency performs consistently to the user's satisfaction.
 
-You will find a detailed guide for each of the steps below.
+You will find a detailed guide for each of the steps below. Read this entire file first before proceeding.
 
 # Step 1: PRD Creation
 
@@ -76,17 +77,15 @@ After the user provides the requested details, proceed to drafting the PRD file 
 
 ### Best Practices
 
-- **4-16 Tools Per Agent**: Each agent should have between 4 and 16 tools. Avoid breaking down the agency into too many agents, unless their responsibilities are significantly different, or the user has requested it.
+- **Each tool must perform a specific realistic task**: Do not create tools that do not correspond to real world tasks. Each tool should focus on a specific action a human typically would perform. For example, "FetchLeadsFromInstagram" is a valid tool, but "OptimizeEmailSubject" is not. Optimizing email subjects is not a real task. Typically, a tool either: 1) connects to an external API, 2) performs a specific action on local files, 3) uses AI inside.
+- **At most 4-16 Tools Per Agent**: Each agent should have between 4 and 16 tools. Avoid breaking down the agency into too many agents, unless their responsibilities are significantly different, or the user has requested it. **Avoid creating tools that the user has not requested.** If it's unclear what tools the agent will need, ask the user for clarification or continue without them.
+- **Ask for API keys before creating any tools**: If a tool requires an API key or access token, ask the user to add it to the .env file. Do not proceed with creating the tool until the API key is added, otherwise you will not be able to test them.
 
 # Step 2: Folder Structure and Template Creation
 
-After creating the PRD file, create the folder structure and agent templates, for each agent.
+After creating the PRD file, setup the folder structure for each agent.
 
-Repeat this step for each agent in the agency. Make sure to correctly specify the path to the agency folder.
-
-**Folder Structure**:
-
-After creating the templates, the folder structure is organized as follows:
+The basic folder structure is already created for you:
 
 ```
 ├── example_agent/
@@ -108,7 +107,7 @@ After creating the templates, the folder structure is organized as follows:
 │       ├── ToolName3.py
 │       ├── ...
 ├── agency.py
-├── agency_manifesto.md
+├── shared_instructions.md
 ├── requirements.txt
 ├── .env
 └──...
@@ -135,7 +134,7 @@ After creating the templates, the folder structure is organized as follows:
   - When creating a new agency folder, use descriptive names, like for example: marketing_agency, development_agency, etc.
   - Create a `.env` file in the agency folder and add a placeholder for `OPENAI_API_KEY` and any other API keys that are required by the tools.
 
-Follow this folder structure when further creating or modifying any files.
+Follow this folder structure when further creating or modifying any files. Replace example_agent folders with the actual agents when creating agents for the first time.
 
 # Step 3: Tool Creation
 
@@ -242,7 +241,9 @@ filesystem_server = MCPServerStdio(
 # Reference: https://agency-swarm.ai/core-framework/tools/mcp-integration#step-2-define-sse-server-connection-optional
 ```
 
-For remote MCP servers, you can use the `MCPServerSse` or `MCPServerStreamableHttp` classes.
+For remote MCP servers, you can use the `MCPServerSse` or `MCPServerStreamableHttp` classes. See documentation for more details.
+
+**Important**: Prefer creating MCP servers to connect to common platforms like Notion or Hubspot over custom tools. To find the best suited MCP servers, use web search.
 
 ### Web Search Tool (Built-in)
 
@@ -265,6 +266,7 @@ To create an agent:
    ```python
    from agents import ModelSettings
    from agency_swarm import Agent
+   from openai.types.shared import Reasoning
 
    ceo = Agent(
        name="CEO",
@@ -273,7 +275,9 @@ To create an agent:
        tools_folder="./tools",
        model="gpt-5",
        model_settings=ModelSettings(
-           max_tokens=25000,
+           reasoning=Reasoning(
+               effort="minimal",
+           ),
        ),
    )
    ```
