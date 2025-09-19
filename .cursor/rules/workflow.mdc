@@ -273,7 +273,8 @@ To create an agent:
        model="gpt-5",
        model_settings=ModelSettings(
            reasoning=Reasoning(
-               effort="minimal",
+               effort="medium",
+               summary="auto",
            ),
        ),
    )

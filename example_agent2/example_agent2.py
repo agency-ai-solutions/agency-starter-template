@@ -11,7 +11,8 @@ example_agent2 = Agent(
     model_settings=ModelSettings(
         max_tokens=25000,
         reasoning=Reasoning(
-            effort="minimal",
+            effort="medium",
+            summary="auto",
         ),
     ),
 )
