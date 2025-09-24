@@ -343,19 +343,25 @@ Agencies are collections of agents that work together to achieve a common goal. 
 
    load_dotenv()
 
-   agency = Agency(
-       ceo,
-       communication_flows=[
-           (ceo, developer),
-           (ceo, virtual_assistant),
-           (developer, virtual_assistant),
-       ],
-       shared_instructions="shared_instructions.md",
-   )
+   # do not remove this method, it is used in the main.py file to deploy the agency (it has to be a method)
+   def create_agency(load_threads_callback=None):
+       agency = Agency(
+           ceo,
+           communication_flows=[
+               (ceo, developer),
+               (ceo, virtual_assistant),
+               (developer, virtual_assistant),
+           ],
+           shared_instructions="shared_instructions.md",
+       )
+       return agency
 
    if __name__ == "__main__":
-       agency.run_demo()
+       agency = create_agency()
+       agency.terminal_demo()
    ```
+
+   Agency must export a create_agency method, which is used for deployment.
 
    The first argument is the entry point for user communication. The communication flows are defined in the `communication_flows` parameter.
 
