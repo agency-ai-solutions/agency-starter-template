@@ -283,6 +283,7 @@ To create an agent:
    - **name**: The agent's name, reflecting its role.
    - **description**: A brief summary of the agent's responsibilities.
    - **instructions**: Path to a markdown file containing detailed instructions for the agent.
+   - **model**: The model to use for the agent. **Use gpt-5 by default**, which is already available.
    - **tools_folder**: Folder containing the tools for the agent. Tool modules are automatically imported. Each tool class must be named the same as the tool file. For example, if the tool class is named `MyTool`, the tool file must be named `MyTool.py`.
    - **Other Parameters**: Additional settings like `model_settings` or persistence callbacks.
 
