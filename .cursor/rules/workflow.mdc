@@ -32,7 +32,7 @@ First, ask the user to provide all necessary details:
 - Communication Flows (between agents and from agents to user)
 - Agents (for each agent: name, role, tools with descriptions)
 
-Once you have gathered all details, create the file `agency_name/prd.txt` using the following template:
+Once you have gathered all details, create the file `./prd.txt` using the following template:
 
 ```md
 # [Agency Name]
