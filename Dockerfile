@@ -40,9 +40,6 @@ COPY --from=builder /install /usr/local
 # Copy source code
 COPY ./ .
 
-# Initialize and update git submodules
-RUN git submodule update --init --recursive
-
 EXPOSE 8080
 
 CMD ["python", "-u", "main.py"]
