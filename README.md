@@ -62,6 +62,7 @@ agency-github-template/
     ├── __init__.py
     ├── example_agent.py
     ├── instructions.md
+    ├── files/               # Local files accessible to the agent (via files_folder)
     └── tools/
         └── ExampleTool.py
 ├── example_agent2/
