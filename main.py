@@ -3,13 +3,14 @@
 import logging
 from dotenv import load_dotenv
 
-from agency import create_agency
-from agency_swarm.integrations.fastapi import run_fastapi
-
 load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
+
+from agency import create_agency
+from agency_swarm.integrations.fastapi import run_fastapi
+
 
 if __name__ == "__main__":
     run_fastapi(
