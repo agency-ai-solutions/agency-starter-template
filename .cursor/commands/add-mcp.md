@@ -434,9 +434,21 @@ If there is an issue, you must keep troubleshooting until the MCP server is work
 ### Authentication errors
 
 1. Verify API keys are in `.env` file
-2. Check `os.getenv("KEY_NAME")` matches the `.env` key name
-3. Ensure `.env` file is loaded with `load_dotenv()`
-4. Check header format matches server requirements
+2. Ensure `.env` file is loaded with `load_dotenv()`
+3. For remote MCP servers that require OAuth, use mcp-remote npm package:
+
+```json
+{
+  "mcpServers": {
+    "remote-example": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://remote.mcp.server/mcp"]
+    }
+  }
+}
+```
+
+Fetch this link for more details: https://raw.githubusercontent.com/geelen/mcp-remote/refs/heads/main/README.md
 
 ### Timeout errors
 
@@ -448,12 +460,13 @@ If there is an issue, you must keep troubleshooting until the MCP server is work
 
 ## Important Configuration Notes
 
-1. **Always set `cache_tools_list=True`** - Required for performance
-2. **HostedMCPTool uses `tools` parameter** - Not `mcp_servers`
-3. **All servers except HostedMCPTool use `mcp_servers` parameter** - Not `tools`
-4. **Import `load_dotenv()` and call it** - Before accessing environment variables
-5. **Use descriptive server names** - Agent sees `[Server_Name].[tool_name]` format
-6. **Test after adding** - Always verify tools are accessible
+1. **Prefer official hosted or open source MCP servers** - Don't use third party open source MCP servers if official ones are available.
+2. **Always set `cache_tools_list=True`** - Required for performance
+3. **HostedMCPTool uses `tools` parameter** - Not `mcp_servers`
+4. **All servers except HostedMCPTool use `mcp_servers` parameter** - Not `tools`
+5. **Import `load_dotenv()` and call it** - Before accessing environment variables
+6. **Use descriptive server names** - Agent sees `[Server_Name].[tool_name]` format
+7. **Test after adding** - Always verify tools are accessible
 
 ---
 
