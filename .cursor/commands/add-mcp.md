@@ -537,9 +537,21 @@ If there is an issue, you must keep troubleshooting until the MCP server is work
 ### Authentication errors
 
 1. Verify API keys are in `.env` file
-2. Check `os.getenv("KEY_NAME")` matches the `.env` key name
-3. Ensure `.env` file is loaded with `load_dotenv()`
-4. Check header format matches server requirements
+2. Ensure `.env` file is loaded with `load_dotenv()`
+3. For remote MCP servers that require OAuth, use mcp-remote npm package:
+
+```json
+{
+  "mcpServers": {
+    "remote-example": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://remote.mcp.server/mcp"]
+    }
+  }
+}
+```
+
+Fetch this link for more details: https://raw.githubusercontent.com/geelen/mcp-remote/refs/heads/main/README.md
 
 ### Timeout errors
 
