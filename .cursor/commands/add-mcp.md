@@ -6,12 +6,13 @@ Your task is to add Model Context Protocol (MCP) server to an Agency Swarm agent
 
 ## Quick Reference: MCP Server Types
 
-| Server Type         | When to Use                            | URL Pattern              | Class to Use              |
-| ------------------- | -------------------------------------- | ------------------------ | ------------------------- |
-| **Hosted Remote**   | Publicly accessible web service        | Any public URL           | `HostedMCPTool`           |
-| **Streamable HTTP** | HTTP streaming server                  | Ends in `/mcp`           | `MCPServerStreamableHttp` |
-| **SSE**             | Server-Sent Events server              | Ends in `/sse`           | `MCPServerSse`            |
-| **Local/Stdio**     | GitHub repo, local script, or CLI tool | GitHub URL or local path | `MCPServerStdio`          |
+| Server Type               | When to Use                                | URL Pattern              | Class to Use                    |
+| ------------------------- | ------------------------------------------ | ------------------------ | ------------------------------- |
+| **Hosted Remote**         | Publicly accessible web service            | Any public URL           | `HostedMCPTool`                 |
+| **Hosted Remote (OAuth)** | Publicly accessible web service with OAuth | Any public URL           | `MCPServerStdio` + `mcp-remote` |
+| **Streamable HTTP**       | HTTP streaming server                      | Ends in `/mcp`           | `MCPServerStreamableHttp`       |
+| **SSE**                   | Server-Sent Events server                  | Ends in `/sse`           | `MCPServerSse`                  |
+| **Local/Stdio**           | GitHub repo, local script, or CLI tool     | GitHub URL or local path | `MCPServerStdio`                |
 
 ---
 
@@ -21,7 +22,9 @@ Your task is to add Model Context Protocol (MCP) server to an Agency Swarm agent
 
 **If user provides a URL:**
 
-- Check if it's a public/internet-accessible URL → Use `HostedMCPTool`
+- Check if it's a public/internet-accessible URL:
+  - **Requires OAuth authentication?** → Use `mcp-remote` with `MCPServerStdio`
+  - **No authentication or token-based auth?** → Use `HostedMCPTool`
 - Check if URL ends with `/mcp` → Use `MCPServerStreamableHttp` (or `HostedMCPTool` if public)
 - Check if URL ends with `/sse` → Use `MCPServerSse` (or `HostedMCPTool` if public)
 
@@ -31,10 +34,11 @@ Your task is to add Model Context Protocol (MCP) server to an Agency Swarm agent
 
 **If unclear, ask:**
 
-1. Is this a publicly accessible URL? (HostedMCPTool)
-2. Is this a local server you'll run? (MCPServerStdio, MCPServerSse, or MCPServerStreamableHttp)
-3. What's the server endpoint URL? (check `/mcp` or `/sse` suffix)
-4. Which agent do you want to add this MCP server to?
+1. Is this a publicly accessible URL? (HostedMCPTool or mcp-remote)
+2. Does it require OAuth authentication? (Use mcp-remote)
+3. Is this a local server you'll run? (MCPServerStdio, MCPServerSse, or MCPServerStreamableHttp)
+4. What's the server endpoint URL? (check `/mcp` or `/sse` suffix)
+5. Which agent do you want to add this MCP server to?
 
 ---
 
@@ -253,6 +257,79 @@ params={
 }
 ```
 
+#### Option E: Hosted Remote Server with OAuth (mcp-remote)
+
+**When to use:** Server is publicly accessible but requires OAuth authentication (e.g., Notion, Google services).
+
+This uses the `mcp-remote` tool ([documentation](https://github.com/geelen/mcp-remote)) to handle OAuth flows and token management for hosted MCP servers.
+
+```python
+import os
+from pathlib import Path
+from agency_swarm import Agent
+from agents.mcp import MCPServerStdio
+
+# Get the folder path to store MCP credentials locally
+folder_path = Path(__file__).parent.parent  # Go up to agency root
+
+# Define the OAuth MCP server using mcp-remote
+oauth_mcp_server = MCPServerStdio(
+    name="Descriptive Server Name",
+    params={
+        "command": "npx",
+        "args": [
+            "-y",
+            "mcp-remote",
+            "https://your-server.com/mcp"  # The hosted MCP server URL
+        ],
+        "env": {
+            # Store OAuth credentials in local directory
+            "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mcp_credentials")
+        }
+    },
+    cache_tools_list=True,  # REQUIRED: Enable caching
+    client_session_timeout_seconds=20,  # Increase timeout for OAuth flows
+    tool_filter={
+        # Optional: Limit to specific tools
+        "allowed_tool_names": ["tool1", "tool2", "tool3"]
+    }
+)
+```
+
+**How it works:**
+
+1. `mcp-remote` acts as a bridge between local stdio and remote OAuth servers
+2. On first run, it will open a browser for OAuth authentication
+3. Credentials are saved in the `mcp_credentials` folder (add to `.gitignore`)
+4. Subsequent runs reuse the saved tokens automatically
+
+**Example of a Notion MCP Server:**
+
+```python
+# Notion MCP Server
+notion_mcp = MCPServerStdio(
+    name="Notion MCP",
+    params={
+        "command": "npx",
+        "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
+        "env": {
+            "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mcp_credentials")
+        }
+    },
+    cache_tools_list=True,
+    client_session_timeout_seconds=20,
+    tool_filter={
+        "allowed_tool_names": ["notion-fetch", "notion-create-pages", "notion-update-page"]
+    }
+)
+```
+
+**Important Notes:**
+
+- Increase `client_session_timeout_seconds` to at least 20 for OAuth flows
+- The first run will require user interaction to authenticate
+- Use `tool_filter` to limit exposed tools if needed
+
 ---
 
 ### Step 4: Add Required Environment Variables
@@ -327,7 +404,33 @@ python agent_name/agent_name.py
 
 ## Common MCP Server Examples
 
-### 1. Filesystem Server (Local)
+### 1. Notion Server (OAuth-authenticated Hosted)
+
+```python
+import os
+from pathlib import Path
+from agents.mcp import MCPServerStdio
+
+folder_path = Path(__file__).parent.parent
+
+notion_mcp = MCPServerStdio(
+    name="Notion_MCP",
+    params={
+        "command": "npx",
+        "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
+        "env": {
+            "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mcp_credentials")
+        }
+    },
+    cache_tools_list=True,
+    client_session_timeout_seconds=20,
+    tool_filter={
+        "allowed_tool_names": ["notion-fetch", "notion-create-pages", "notion-update-page"]
+    }
+)
+```
+
+### 2. Filesystem Server (Local)
 
 ```python
 from pathlib import Path
@@ -345,7 +448,7 @@ filesystem_server = MCPServerStdio(
 )
 ```
 
-### 2. GitHub Server (Hosted)
+### 3. GitHub Server (Hosted with Token Auth)
 
 ```python
 from agency_swarm import HostedMCPTool
@@ -364,7 +467,7 @@ github_mcp = HostedMCPTool(
 )
 ```
 
-### 3. Database Server (Local SSE)
+### 4. Database Server (Local SSE)
 
 ```python
 from agents.mcp import MCPServerSse
@@ -444,6 +547,21 @@ If there is an issue, you must keep troubleshooting until the MCP server is work
 2. Check server is responsive
 3. Verify network connectivity (for remote servers)
 
+### OAuth / mcp-remote errors
+
+1. **Timeout during OAuth**: Increase `client_session_timeout_seconds` to 30 or higher
+2. **"Client mode" debugging**: Test connection independently:
+   ```bash
+   npx -y mcp-remote https://your-server.com/mcp
+   ```
+3. **Check logs**: Enable debug logging with `--debug` flag:
+   ```python
+   params={
+       "command": "npx",
+       "args": ["-y", "mcp-remote", "https://your-server.com/mcp", "--debug"]
+   }
+   ```
+
 ---
 
 ## Important Configuration Notes
@@ -454,6 +572,8 @@ If there is an issue, you must keep troubleshooting until the MCP server is work
 4. **Import `load_dotenv()` and call it** - Before accessing environment variables
 5. **Use descriptive server names** - Agent sees `[Server_Name].[tool_name]` format
 6. **Test after adding** - Always verify tools are accessible
+7. **OAuth timeout** - Set `client_session_timeout_seconds` to at least 20 for OAuth flows
+8. **Allowed Tools** - `tool_filter` parameter only works when running an agent, not list_tools() method.
 
 ---
 
@@ -463,6 +583,7 @@ If there is an issue, you must keep troubleshooting until the MCP server is work
 - [OpenAI Agents SDK MCP Guide](https://openai.github.io/openai-agents-python/mcp/)
 - [MCP Protocol Specification](https://modelcontextprotocol.io/)
 - [MCP Servers Directory](https://github.com/modelcontextprotocol/servers)
+- [mcp-remote - OAuth bridge for MCP servers](https://github.com/geelen/mcp-remote)
 
 ---
 
@@ -472,7 +593,11 @@ If there is an issue, you must keep troubleshooting until the MCP server is work
 User wants to add MCP server
 │
 ├─ Is it a public URL?
-│  └─ YES → Use HostedMCPTool (in tools parameter)
+│  ├─ Requires OAuth? → Use mcp-remote with MCPServerStdio (in mcp_servers)
+│  │  ├─ Use npx -y mcp-remote <URL>
+│  │  ├─ Set MCP_REMOTE_CONFIG_DIR to local folder
+│  │  └─ First run opens browser for OAuth
+│  └─ No OAuth? → Use HostedMCPTool (in tools parameter)
 │
 ├─ Is it a local server URL?
 │  ├─ Ends in /sse? → Use MCPServerSse (in mcp_servers)
