@@ -416,3 +416,4 @@ If the user is not starting their agency from scratch, you can start from one of
 2. Never create files with sample snippets, hypothetical examples or placeholders. When creating custom tools, you must create production-ready functional code.
 3. Ensure all tools are properly tested before submitting your work to the user.
 4. Follow the specified file creation order rigorously: 1. requirements.txt, 2. tools, 3. agents, 4. instructions.md. 5. agency.py.
+5. Before strating to build the new agency, remove example agents.

@@ -415,3 +415,4 @@ If the user is not starting their agency from scratch, you can start from one of
 4. Follow the specified file creation order rigorously: 1. requirements.txt, 2. tools, 3. agents, 4. instructions.md. 5. agency.py.
 5. You can find more documentation in the ./.claude/agents/\*\* for each part of the agent building process accordingly.
 6. Additionally, there is an .cursor/commands/add-mcp.md file that contains the instructions for adding MCP servers your agents.
+7. Before strating to build the new agency, remove example agents.
