@@ -309,7 +309,11 @@ To create an agent:
 
    # Instructions
 
-   **[Provide a step-by-step instructions process on how this process should be performed. Use a numbered list.]**
+   # [Task Name]
+
+   **[Provide a step-by-step instructions process on how this task should be performed. Use a numbered list.]**
+
+   [...repeat for each task]
 
    # Additional Notes
 
