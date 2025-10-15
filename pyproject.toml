@@ -3,7 +3,7 @@
 [project]
 name = "my-agency"
 description = "My awesome agency"
-version = "0.1.0"
+version = "0.0.1"
 license = { text = "MIT" }
 keywords = ["agency-swarm", "agencii"]
 
