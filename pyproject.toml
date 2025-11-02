@@ -1,0 +1,11 @@
+# only listed properties are used by the system
+
+[project]
+name = "my-agency"
+description = "My awesome agency"
+version = "0.0.1"
+license = { text = "MIT" }
+keywords = ["agency-swarm", "agencii"]
+
+[tool.template]
+version = "0.0.2"
