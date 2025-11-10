@@ -283,8 +283,8 @@ oauth_mcp_server = MCPServerStdio(
             "https://your-server.com/mcp"  # The hosted MCP server URL
         ],
         "env": {
-            # Store OAuth credentials in local directory
-            "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mcp_credentials")
+            # Store OAuth credentials in ./mnt/mcp_credentials/ folder for persistence
+            "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mnt", "mcp_credentials")
         }
     },
     cache_tools_list=True,  # REQUIRED: Enable caching
@@ -300,8 +300,8 @@ oauth_mcp_server = MCPServerStdio(
 
 1. `mcp-remote` acts as a bridge between local stdio and remote OAuth servers
 2. On first run, it will open a browser for OAuth authentication
-3. Credentials are saved in the `mcp_credentials` folder (add to `.gitignore`)
-4. Subsequent runs reuse the saved tokens automatically
+3. Credentials are saved in the `mnt/mcp_credentials/` folder (don't add to `.gitignore`)
+4. Subsequent runs reuse the saved tokens automatically. ./mnt folder is for persistent storage.
 
 **Example of a Notion MCP Server:**
 
@@ -419,7 +419,7 @@ notion_mcp = MCPServerStdio(
         "command": "npx",
         "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
         "env": {
-            "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mcp_credentials")
+            "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mnt", "mcp_credentials")
         }
     },
     cache_tools_list=True,
@@ -586,6 +586,7 @@ Fetch this link for more details: https://raw.githubusercontent.com/geelen/mcp-r
 6. **Test after adding** - Always verify tools are accessible
 7. **OAuth timeout** - Set `client_session_timeout_seconds` to at least 20 for OAuth flows
 8. **Allowed Tools** - `tool_filter` parameter only works when running an agent, not list_tools() method.
+9. **Persistent Storage** - Use `mnt` folder for persistent storage of OAuth credentials and other data.
 
 ---
 
