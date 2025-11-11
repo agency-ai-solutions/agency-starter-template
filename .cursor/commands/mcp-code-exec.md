@@ -134,7 +134,7 @@ def get_server() -> MCPServerStdio:  # Adjust return type if using different ser
         #         "command": "npx",
         #         "args": ["-y", "mcp-remote", "https://your-server.com/mcp"],
         #         "env": {
-        #             "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mnt", "mcp_credentials") # persistent storage for OAuth credentials, don't add to .gitignore
+        #             "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mnt", "mcp-creds") # persistent storage for OAuth credentials, don't add to .gitignore
         #         }
         #     },
         #     cache_tools_list=True,
@@ -312,17 +312,27 @@ __all__ = [
 ]
 ```
 
+Also, add nest_asyncio to requirements.txt.
+
+```
+nest_asyncio
+```
+
+This helps the AI agent to use async MCP calls inside IPython without conflicts.
+
 ---
 
 ### Step 5: Test the Implementation
 
-Test the implementation by specific tools using the following command:
+Test the implementation by running specific tool files using the following command:
 
 ```bash
 python ./servers/[server_name]/[tool_name].py
 ```
 
-Only run fetch tools, do not update, create any data.
+Only execute read tools, do not update, or create any data. Make sure you do not make any changes to the user's accounts.
+
+**Do not come back to the user until you have tested at least 1 tool for each MCP server.**
 
 ## Troubleshooting
 
@@ -342,6 +352,17 @@ Only run fetch tools, do not update, create any data.
 
 **Fix**: Increase `client_session_timeout_seconds` to 30 or higher in server.py
 
+### User can't authenticate on deployed server
+
+**Symptom**: MCP server can't authenticate when agency is deployed.
+
+**Fix**:
+
+1. Ensure `MCP_REMOTE_CONFIG_DIR` is set correctly for mcp-remote servers.
+2. Ensure all other MCP servers store credentials in `./mnt/mcp-creds`.
+3. Do not add credentials to .gitignore or .dockerignore. Instead, tell the user to ensure their repo is not public.
+4. Make sure to add node install to Dockerfile if using any npm servers, like mcp-remote.
+
 ---
 
 ## Quick Checklist
@@ -350,6 +371,9 @@ Only run fetch tools, do not update, create any data.
 - [ ] Implement `server.py` with singleton pattern and discovery in `__main__`
 - [ ] Run `python ./servers/[server_name]/server.py` to discover tools
 - [ ] Create individual tool files using descriptions from MCP server output
+- [ ] All OAuth servers store credentials in `./mnt/mcp-creds` for persistence.
+- [ ] Node install is added to Dockerfile if using any npm servers.
+- [ ] nest_asyncio is added to requirements.txt.
 - [ ] Add `if __name__ == "__main__"` test blocks to each tool file
 - [ ] Create `__init__.py` with exports
 - [ ] Test individual tools: `python ./servers/[server_name]/[tool].py`

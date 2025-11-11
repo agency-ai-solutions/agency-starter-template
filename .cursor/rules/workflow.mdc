@@ -7,6 +7,7 @@ Agency Swarm is the framework built on the OpenAI Agents SDK. It allows anyone t
 
 The following steps outline how to build AI agents with Agency Swarm:
 
+0. **Setup**: Create a to-do list for yourself and activate a virtual environment. If virtual environment does not exist, create it.
 1. **Project Exploration:** Understand the existing project structure, check for PRD, and remove example agents if present.
 2. **Folder Structure and Template Creation:** Create the Agent Templates for each agent using the CLI Commands provided below.
 3. **Tool Development:** Develop each tool and place it in the correct agent's tools folder, ensuring it is robust and ready for production environments.
@@ -396,7 +397,9 @@ If the user is not starting their agency from scratch, you can start from one of
 2. Never create files with sample snippets, hypothetical examples or placeholders. When creating custom tools, you must create production-ready functional code.
 3. Ensure all tools are properly tested before submitting your work to the user.
 4. Follow the specified file creation order rigorously.
-5. Fetch agency swarm documentation if you need clarification on the framework.
+5. Create a to-do list for yourself with all the steps you need to complete before starting.
+6. Don't start coding until you confirm virtual environment is activated.
+7. Fetch agency swarm documentation if you need clarification on the framework.
 
 # References
 

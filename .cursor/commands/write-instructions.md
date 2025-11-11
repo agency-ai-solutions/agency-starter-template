@@ -70,19 +70,28 @@ Output: "[error response]"
 - Understand communication flows and relationships with other agents
 - **For refinement**: Read current `instructions.md` FIRST
 
-**Step 2: Identify What to Write/Fix**
+**Step 2: Ask the User Key Questions**
 
-- **New agent**: Define role, tasks, workflow from PRD/docs
+- What are the main goals for this agent?
+- What process should the agent follow?
+- What specific tasks does the agent need to complete?
+- What is your preferred output format?
+- Do you have any examples you can privde?
+- Any other additional notes?
+
+**Step 3: Identify What to Write/Fix**
+
+- **New agent**: Define role, tasks, workflow from PRD/docs and user responses
 - **Refinement**: What's failing? Why? (tool usage, logic, format, performance)
 
-**Step 3: Write/Modify Instructions**
+**Step 4: Write/Modify Instructions**
 
 - **New agent**: Use template above - leave sections blank if no information
 - **Refinement**: Make MINIMAL changes - modify existing steps, don't add unless necessary
 - Integrate tools with specific parameters and conditions
 - Include error handling
 
-**Step 4: Self-Check**
+**Step 5: Self-Check**
 
 - Would YOU understand and follow these instructions?
 - Are tool parameters, conditions, and output formats explicit?
@@ -93,14 +102,7 @@ Output: "[error response]"
 - **No speculation** - leave blank if you don't have information
 - **Examples are optional** - skip if not provided
 - **Only write what you know** - don't make up tool names, parameters, or workflows
-
----
-
-## File Ownership
-
-**You modify ONLY**: `instructions.md` files in agent folders
-
-**Never touch**: `agent_name.py`, `__init__.py`, files in `tools/`, `agency.py`
+- **Minimal changes** - make the smallest change needed to achieve a desired behavior of the agent.
 
 ---
 
