@@ -41,9 +41,9 @@ Create a dedicated folder for the MCP server in `./servers/` directory:
 ```
 ./servers/notion/
 ├── server.py
-├── search.py
-├── fetch.py
-├── create_pages.py
+├── notion_search.py
+├── notion_fetch.py
+├── notion_create_pages.py
 └── __init__.py
 ```
 
@@ -220,17 +220,19 @@ This will list all available tools with their descriptions and parameters. Use t
 
 For each tool discovered by running `server.py`, create a dedicated Python file. **Use the exact descriptions and parameters from the MCP server output** - don't add examples or extra documentation unless provided by the MCP server.
 
-**Template (`./servers/[server_name]/[tool_name].py`):**
+**Naming Convention:**
+
+- File name: `[mcp_prefix]_[tool_name].py` (e.g., `notion_fetch.py`, `gdrive_search.py`)
+- Function name: Must match file name without `.py` (e.g., `notion_fetch()`, `gdrive_search()`)
+
+**Template (`./servers/[server_name]/[mcp_prefix]_[tool_name].py`):**
 
 ```python
-"""
-[Tool description from MCP server]
-"""
 from typing import Optional, Dict, List, Any
 from .server import call_tool
 
 
-async def [tool_name](
+async def [mcp_prefix]_[tool_name](
     required_param: str,
     optional_param: Optional[str] = None,
     another_param: Optional[Dict[str, Any]] = None
@@ -259,14 +261,40 @@ async def [tool_name](
     return await call_tool("[mcp-tool-name]", arguments)
 
 
-# Test - run with: python ./servers/[server_name]/[tool_name].py
+# IMPORTANT: If MCP server schema shows a single 'data' or 'options' parameter,
+# document the expected dict structure in the docstring based on the examples:
+async def [mcp_prefix]_[tool_with_data_param](data: Dict[str, Any]) -> str:
+    """
+    [Tool description from MCP server]
+
+    Args:
+        data: The data required for the operation. Should contain:
+            - field1 (str, required): Description from MCP examples
+            - field2 (str, optional): Description from MCP examples
+            - field3 (dict, optional): Description from MCP examples
+
+    Example from MCP server:
+        {
+            "field1": "value",
+            "field2": "optional_value",
+            "field3": {"nested": "data"}
+        }
+
+    Returns:
+        Tool result as string
+    """
+    arguments = {"data": data}
+    return await call_tool("[mcp-tool-name]", arguments)
+
+
+# Test - run with: python ./servers/[server_name]/[mcp_prefix]_[tool_name].py
 if __name__ == "__main__":
     import asyncio
 
     async def test():
-        print("Testing [tool_name]...")
+        print("Testing [mcp_prefix]_[tool_name]...")
         try:
-            result = await [tool_name]("test_value")
+            result = await [mcp_prefix]_[tool_name]("test_value")
             print(f"✓ Success: {str(result)[:200]}...")
         except Exception as e:
             print(f"✗ Error: {e}")
@@ -294,9 +322,9 @@ See: https://www.anthropic.com/engineering/code-execution-with-mcp
 from .server import get_server, ensure_connected, call_tool
 
 # Individual tools
-from .[tool_1] import [tool_1]
-from .[tool_2] import [tool_2]
-from .[tool_3] import [tool_3]
+from .[mcp_prefix]_[tool_1] import [mcp_prefix]_[tool_1]
+from .[mcp_prefix]_[tool_2] import [mcp_prefix]_[tool_2]
+from .[mcp_prefix]_[tool_3] import [mcp_prefix]_[tool_3]
 # ... more imports
 
 __all__ = [
@@ -305,9 +333,9 @@ __all__ = [
     "ensure_connected",
     "call_tool",
     # Tools
-    "[tool_1]",
-    "[tool_2]",
-    "[tool_3]",
+    "[mcp_prefix]_[tool_1]",
+    "[mcp_prefix]_[tool_2]",
+    "[mcp_prefix]_[tool_3]",
     # ... more exports
 ]
 ```
@@ -327,12 +355,28 @@ This helps the AI agent to use async MCP calls inside IPython without conflicts.
 Test the implementation by running specific tool files using the following command:
 
 ```bash
-python ./servers/[server_name]/[tool_name].py
+python ./servers/[server_name]/[mcp_prefix]_[tool_name].py
 ```
 
 Only execute read tools, do not update, or create any data. Make sure you do not make any changes to the user's accounts.
 
 **Do not come back to the user until you have tested at least 1 tool for each MCP server.**
+
+### Step 6: Update instructions.md
+
+Update instructions.md to reflect the new MCP server implementation. The agent should follow this process:
+
+1. Discover existing skills in ./mnt/skills folder
+2. Use skill if it matches task
+3. If no skills found, read ONLY necessary tool files
+4. Import and combine tools in IPythonInterpreter
+5. Suggest new skills to be added
+
+Keep these instructions short. Don't add mcp usage examples or don't list all mcps. Agent should discover them autonomously.
+
+Agent should also minimize token consumption by performing as few tool calls as possible and only reading the necessary tool files to complete the task.
+
+Perform minimal changes to instructions in order to achieve desired behavior.
 
 ## Troubleshooting
 
@@ -376,7 +420,8 @@ Only execute read tools, do not update, or create any data. Make sure you do not
 - [ ] nest_asyncio is added to requirements.txt.
 - [ ] Add `if __name__ == "__main__"` test blocks to each tool file
 - [ ] Create `__init__.py` with exports
-- [ ] Test individual tools: `python ./servers/[server_name]/[tool].py`
+- [ ] Test individual tools: `python ./servers/[server_name]/[mcp_prefix]_[tool].py`
+- [ ] Update instructions.md to ensure the agent can effectively use these tools.
 
 ---
 
@@ -385,3 +430,11 @@ Only execute read tools, do not update, or create any data. Make sure you do not
 - [Anthropic: Code execution with MCP](https://www.anthropic.com/engineering/code-execution-with-mcp)
 - [Agency Swarm MCP Integration](https://agency-swarm.ai/core-framework/tools/mcp-integration)
 - [Adding MCP Servers to Agents](.cursor/commands/add-mcp.md)
+
+## Final Notes
+
+- You MUST create **all tools** for each MCP server. Tools must never contain placeholders. Each tool must be a production-ready functional code.
+- **CRITICAL**: When MCP schema shows a single `data`, `options`, or similar dict parameter, you MUST document the expected dict structure in the docstring using the examples from the MCP tool description. Never leave dict parameters undocumented.
+- If credentials for testing are missing, notify the user to provide them before starting to create the tools or any MCP server.
+- YOU MUST NEVER SKIP THE TEST. NEVER CREATE A DUMMY TEST CASE WITH ONLY PRINT STATEMENTS OR IMPORTS. ASK THE USER TO PROVIDE THE CREDENTIALS INSTEAD.
+- DO NOT tell the user the task has been completed until you have created **all tools** and tested at least 1 for each MCP server.
