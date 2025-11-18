@@ -467,6 +467,8 @@ github_mcp = HostedMCPTool(
 )
 ```
 
+**Important**: HostedMCPTool goes in the `tools` parameter, not `mcp_servers`!
+
 ### 4. Database Server (Local SSE)
 
 ```python
@@ -587,6 +589,7 @@ Fetch this link for more details: https://raw.githubusercontent.com/geelen/mcp-r
 7. **OAuth timeout** - Set `client_session_timeout_seconds` to at least 20 for OAuth flows
 8. **Allowed Tools** - `tool_filter` parameter only works when running an agent, not list_tools() method.
 9. **Persistent Storage** - Use `mnt` folder for persistent storage of OAuth credentials and other data.
+10. **HostedMCPTool goes in the `tools` parameter**: Unlike all other servers, HostedMCPTool goes in the `tools` parameter, not `mcp_servers`.
 
 ---
 
