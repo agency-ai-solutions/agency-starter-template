@@ -116,6 +116,8 @@ Follow this folder structure when further creating or modifying any files. Repla
 agency-swarm create-agent-template --description "Description of the agent" --model "gpt-5.1" --reasoning "medium" "agent_name"
 ```
 
+Use gpt-5.1 model for all agents by default. It is the lastest model from OpenAI that was recently released.
+
 ### Best Practices for Agent Structures
 
 - **Realistic Agent Roles**: Model agents after actual job positions, not task-specific roles
@@ -252,12 +254,13 @@ tools = [WebSearchTool(), ImageGenerationTool()]
   - ✅ Good: "FetchInstagramLeads", "QueryDatabase", "SendSlackNotification"
   - ❌ Bad: "OptimizeText", "AnalyzeData", "MakeDecision"
 - **Comments**: Well-commented code with clear step-by-step explanations ("# Step 1: ...", "# Step 2: ...")
-- **Code Reliability**: Write production-ready functional code without placeholders or hypothetical examples
+- **Code Reliability**: Write production-ready functional code without ever adding any placeholders or hypothetical examples.
 - **NEVER include API keys as tool inputs**: Always retrieve from environment variables using `os.getenv()` inside the `run` method
+- **Don't return too much data**: Do not return b64 iamges or large files to avoid overloading agents' context window.
 - **Use global variables for constants**: Define constant values (account_id, etc.) as global variables above the class, not in Pydantic `Field`
-- **Add test case**: Include a test case in the `if __name__ == "__main__":` bloc for custom tools.
-- **Avoid Redundant Logic**: Don't embed complex analysis logic inside tools. Let the agent do the analysis with simple tools
-- **Keep Tools Single-Purpose**: Create atomic tools that perform specific tasks. The agent combines them for complex workflows
+- **Add test case**: Include a test case in the `if __name__ == "__main__":` block for custom tools.
+- **Avoid Redundant Logic**: Don't embed complex analysis and logic inside tools, unless user explicitly requests it. Make tools modular and let the agent do the heavy lifting.
+- **Keep Tools Single-Purpose**: Create tools that perform specific atomic actions. The agent can then combine them for more complex multi-step workflows.
 
 # Step 4: Instructions Writing
 
@@ -288,11 +291,11 @@ You are **[insert role, e.g., "a helpful expert" or "a creative storyteller".]**
 
 # Output Format
 
-- **[Best suited output format for the agent (eg. "respond concisely and use simle language") or examples.]**
+- **[Best suited output format for the agent (eg. "respond concisely and use simle language"), examples or templates. Avoid repetition.]**
 
 # Additional Notes
 
-- **[Specify any additional notes here, if any. Use bullet points if needed.]**
+- **[Specify any additional notes here, if any, that do not fit into any of the other sections. Use bullet points. Do not repeat the same info as above. Leave this blank if you do not have anything to add.]**
 ```
 
 ### Best Practices
@@ -305,6 +308,8 @@ You are **[insert role, e.g., "a helpful expert" or "a creative storyteller".]**
 - **Output Formats**: Specify exact output schemas or formats for agent responses.
 - **Iterate Continuously**: Refine instructions based on actual test results and feedback.
 - **Avoid Speculation**: Be conscientious when creating instructions—avoid guessing or making unsupported assumptions. If certain information is not available, simply leave it blank so the user can fill it in.
+- **Avoid Repetition**: Avoid repeating the same information in multiple places. Only repeat certain details after testing the agent if it does not follow them.
+- **Minimal Changes**: Make the smallest change possible to achieve a desired behavior of an agent. Prefer editing existing lines over adding new ones.
 
 # Step 5: Agency Creation
 
