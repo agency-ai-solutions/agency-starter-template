@@ -113,7 +113,7 @@ Follow this folder structure when further creating or modifying any files. Repla
 **To create a new agent template, use the following command:**
 
 ```bash
-agency-swarm create-agent-template --description "Description of the agent" --model "gpt-5" --reasoning "medium" "agent_name"
+agency-swarm create-agent-template --description "Description of the agent" --model "gpt-5.1" --reasoning "medium" "agent_name"
 ```
 
 ### Best Practices for Agent Structures

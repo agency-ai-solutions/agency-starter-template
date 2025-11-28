@@ -2,8 +2,6 @@
 
 Your task is to convert an MCP server into the **Code Execution Pattern** described in [Anthropic's blog post](https://www.anthropic.com/engineering/code-execution-with-mcp). This pattern enables **progressive disclosure** of tools, reducing token usage by up to 98% compared to loading all tools upfront.
 
----
-
 ## Why This Pattern?
 
 **Problem with Traditional MCP:**
@@ -19,376 +17,280 @@ Your task is to convert an MCP server into the **Code Execution Pattern** descri
 - Data processing happens in code before returning to model
 - **Result**: 98.7% token reduction (150K → 2K tokens)
 
----
-
 ## Step-by-Step Implementation
 
-### Step 1: Create Folder Structure
+### Step 0: Create a TO-DO List.
 
-Create a dedicated folder for the MCP server in `./servers/` directory:
+Before starting, check if the user has provided the necessary auth credentials for the MCP servers. If not, ask the user to provide them before starting this task.
 
-```
-./servers/[server_name]/
-├── server.py           # Server singleton & connection management (with discovery in __main__)
-├── [tool_1].py         # Individual tool file (with test in __main__)
-├── [tool_2].py         # Individual tool file (with test in __main__)
-├── [tool_3].py         # Individual tool file (with test in __main__)
-└── __init__.py         # Package exports
-```
+After credentials are provided, create a to-do list for yourself with all the steps you need to complete below.
+
+### Step 1: Create MCP Server Files
+
+Create a dedicated folder for the MCP server in `./agent_name/mcp_servers/` directory.
 
 **Example:**
 
 ```
-./servers/notion/
-├── server.py
-├── notion_search.py
-├── notion_fetch.py
-├── notion_create_pages.py
-└── __init__.py
+./agent_name/mcp_servers/[server_name]/
+├── notion.py           # Server singleton & connection management (with discovery in __main__)
+├── salesforce.py
+├── github.py
+├── youtube.py
+└── __init__.py         # Package exports
 ```
-
-**Create the folder:**
-
-```bash
-mkdir -p ./servers/[server_name]
-```
-
----
 
 ### Step 2: Create the Server Module
 
-The `server.py` module manages the MCP server connection as a singleton. Include tool discovery in the `__main__` block to list available tools.
+The `server.py` module manages the MCP server connection as a singleton. It is converted into tools using `ToolFactory.from_mcp` method, available in agency_swarm specifically for this pattern. This method converts the MCP server into a list of tools.
 
-**Note:** This pattern works with **any MCP server type**. The template below shows `MCPServerStdio` (most common), but you can use:
+Include tool discovery in the `__main__` block to list available tools.
+
+**Note:** This pattern works with any MCP server type, except HostedMCPTool. The template below shows `MCPServerStdio` (most common), but you can use:
 
 - `MCPServerStdio` - Local scripts, npm packages, or OAuth servers with `mcp-remote`
 - `MCPServerSse` - Server-Sent Events servers
 - `MCPServerStreamableHttp` - HTTP streaming servers
-- `HostedMCPTool` - Publicly accessible servers (no need for singleton pattern)
 
 See `.cursor/commands/add-mcp.md` for detailed configuration of each server type.
 
-**Template (`./servers/[server_name]/server.py`):**
+**Template (`./agent_name/mcp_servers/[server_name].py`):**
 
 ```python
 """[Server Name] MCP Server Configuration"""
+from agency_swarm.tools import ToolFactory
 # Choose the appropriate import based on your server type:
 from agents.mcp import MCPServerStdio  # For local scripts, npm packages, or mcp-remote
 # from agents.mcp import MCPServerSse  # For Server-Sent Events servers
 # from agents.mcp import MCPServerStreamableHttp  # For HTTP streaming servers
-# from agency_swarm import HostedMCPTool  # For publicly accessible servers (different pattern)
 
-from typing import Optional
+import os
 
-# Singleton server instance
-_server: Optional[MCPServerStdio] = None  # Adjust type if using different server
-_connected: bool = False
+server_name_mcp = MCPServerStdio( # replace server_name with the name of the MCP server like notion_mcp, salesforce_mcp, github_mcp, youtube_mcp, etc.
+    name="[server_name]_mcp",
+    params={
+        "command": "npx",  # or "python", "node", etc.
+        "args": ["-y", "mcp-remote", "https://your-server.com/mcp"],
+        # Add env vars if needed:
+        # "env": {
+        #     "API_KEY": os.getenv("API_KEY_NAME")
+        # }
+    },
+    cache_tools_list=True,
+    client_session_timeout_seconds=30  # Increase for OAuth
+)
 
-def get_server() -> MCPServerStdio:  # Adjust return type if using different server
-    """Get the [Server Name] MCP server instance (singleton)"""
-    global _server
-    if _server is None:
-        # Example: Stdio server with mcp-remote (OAuth)
-        _server = MCPServerStdio(
-            name="[Server_Name]",
-            params={
-                "command": "npx",  # or "python", "node", etc.
-                "args": ["-y", "mcp-remote", "https://your-server.com/mcp"],
-                # Add env vars if needed:
-                # "env": {
-                #     "API_KEY": os.getenv("API_KEY_NAME")
-                # }
-            },
-            cache_tools_list=True,
-            client_session_timeout_seconds=30  # Increase for OAuth
-        )
+# Example: SSE server
+# server_name_mcp = MCPServerSse(
+#     name="[server_name]_mcp",
+#     params={
+#         "url": "http://localhost:8000/sse",
+#         "headers": {"Authorization": f"Bearer {os.getenv('API_TOKEN')}"}
+#     },
+#     cache_tools_list=True
+# )
 
-        # Example: SSE server
-        # _server = MCPServerSse(
-        #     name="[Server_Name]",
-        #     params={
-        #         "url": "http://localhost:8000/sse",
-        #         "headers": {"Authorization": f"Bearer {os.getenv('API_TOKEN')}"}
-        #     },
-        #     cache_tools_list=True
-        # )
+# Example: Remote OAuth server
+# server_name_mcp = MCPServerStdio(
+#     name="[server_name]_mcp",
+#     params={
+#         "command": "npx",
+#         "args": ["-y", "mcp-remote", "https://your-server.com/mcp"],
+#         "env": {
+#             "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mnt", "mcp-creds") # persistent storage for OAuth credentials, don't add to .gitignore
+#         }
+#     },
+#     cache_tools_list=True,
+#     client_session_timeout_seconds=30
+# )
 
-        # Example: Remote HTTP server
-        # _server = HostedMCPTool(
-        #     name="[Server_Name]",
-        #     tool_config={
-        #         "type": "mcp",
-        #         "server_label": "[Server_Name]",
-        #         "server_url": "https://your-server.com/mcp",
-        #         "require_approval": "never",
-        #         "headers": {
-        #             "Authorization": f"Bearer {os.getenv('API_TOKEN')}"
-        #         }
-        #     }
-        # )
+tools = ToolFactory.from_mcp([server_name_mcp])
 
-        # Example: Remote OAuth server
-        # _server = MCPServerStdio(
-        #     name="[Server_Name]",
-        #     params={
-        #         "command": "npx",
-        #         "args": ["-y", "mcp-remote", "https://your-server.com/mcp"],
-        #         "env": {
-        #             "MCP_REMOTE_CONFIG_DIR": os.path.join(folder_path, "mnt", "mcp-creds") # persistent storage for OAuth credentials, don't add to .gitignore
-        #         }
-        #     },
-        #     cache_tools_list=True,
-        #     client_session_timeout_seconds=30
-        # )
-    return _server
+def generate_schema_file():
+    """Generate readable text schema file for agent's file_search."""
+    lines = ["[SERVER_NAME] MCP TOOLS", "", "Server: [server_name]_mcp",
+             "Description: MCP server description here",
+             f"Total Tools: {len(tools)}", ""]
 
-async def ensure_connected() -> MCPServerStdio:  # Adjust return type if using different server
-    """Ensure the server is connected, connect if not"""
-    global _connected
-    server = get_server()
+    for idx, tool in enumerate(tools, 1):
+        lines.extend(["", f"TOOL {idx}: {tool.name}", "", f"Description:", f"  {tool.description}", "", f"Parameters:"])
+        params = tool.params_json_schema
+        props = params.get("properties", {})
+        required = params.get("required", [])
 
-    if not _connected:
-        await server.connect()
-        _connected = True
+        if props:
+            for name, info in props.items():
+                req = "(required)" if name in required else "(optional)"
+                lines.extend([f"  - {name} {req}", f"    Type: {info.get('type', 'any')}",
+                            f"    Description: {info.get('description', 'No description')}"])
+        else:
+            lines.append("  No parameters required")
+        lines.append("")
 
-    return server
+    agent_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    output_path = os.path.join(agent_folder, "files", "[server_name]_mcp.txt")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-async def call_tool(tool_name: str, arguments: dict):
-    """Call a tool on the MCP server with the given arguments"""
-    server = await ensure_connected()
+    with open(output_path, "w") as f:
+        f.write("\n".join(lines))
 
-    # Get the session
-    session = getattr(server, 'session', None) or getattr(server, '_client_session', None)
-    if not session:
-        raise RuntimeError("Could not access MCP session")
+    print(f"✓ Generated schema file: {output_path}")
+    print(f"✓ Contains {len(tools)} tools")
+    return output_path
 
-    # Call the tool
-    result = await session.call_tool(name=tool_name, arguments=arguments)
-
-    # Extract content from result
-    if hasattr(result, 'content'):
-        content = result.content
-        if isinstance(content, list) and len(content) > 0:
-            return content[0].text if hasattr(content[0], 'text') else str(content[0])
-        return str(content)
-
-    return result
-
-# Tool discovery - run with: python ./servers/[server_name]/server.py
 if __name__ == "__main__":
-    import asyncio
-
-    async def discover_tools():
-        print("Discovering tools from MCP server...")
-        server = await ensure_connected()
-
-        session = getattr(server, 'session', None) or getattr(server, '_client_session', None)
-        if session:
-            tools_result = await session.list_tools()
-            tools = tools_result.tools if hasattr(tools_result, 'tools') else []
-
-            print(f"\nFound {len(tools)} tools:\n")
-            for tool in tools:
-                print(f"Tool: {tool.name}")
-                print(f"  Description: {tool.description}")
-                if hasattr(tool, 'inputSchema') and 'properties' in tool.inputSchema:
-                    print(f"  Parameters:")
-                    schema = tool.inputSchema
-                    for param_name, param_info in schema['properties'].items():
-                        param_type = param_info.get('type', 'any')
-                        param_desc = param_info.get('description', '')
-                        required = param_name in schema.get('required', [])
-                        print(f"    - {param_name}: {param_type} {'(required)' if required else '(optional)'}")
-                        if param_desc:
-                            print(f"      {param_desc}")
-                print()
-
-    asyncio.run(discover_tools())
+    generate_schema_file()
 ```
 
-**Run discovery:**
+**Run to generate schema file:**
 
 ```bash
-python ./servers/[server_name]/server.py
+python ./agent_name/mcp_servers/[server_name]_mcp.py
 ```
 
-This will list all available tools with their descriptions and parameters. Use this output to create individual tool files.
+This will create a JSON schema file in the agent's `files` folder that the agent can search using natural language.
 
----
+**Notes**:
 
-### Step 3: Create Individual Tool Files
+- Make sure not to create an extra files folder. When creating a json schema, it must be saved in the same files folder that might already exist.
+- Each schema file must be a .txt file, not a .json file.
 
-For each tool discovered by running `server.py`, create a dedicated Python file. **Use the exact descriptions and parameters from the MCP server output** - don't add examples or extra documentation unless provided by the MCP server.
+### Step 3: Generate Schema File
 
-**Naming Convention:**
+Generate the JSON schema file for the agent's knowledge base by running the MCP server file:
 
-- File name: `[mcp_prefix]_[tool_name].py` (e.g., `notion_fetch.py`, `gdrive_search.py`)
-- Function name: Must match file name without `.py` (e.g., `notion_fetch()`, `gdrive_search()`)
+```bash
+python ./agent_name/mcp_servers/[server_name]_mcp.py
+```
 
-**Template (`./servers/[server_name]/[mcp_prefix]_[tool_name].py`):**
+This creates `agent_name/files/[server_name]_mcp.txt` containing all tool schemas in a readable text format that the agent can search.
+
+### Step 4: Test Individual Tools
+
+Test the individual tools from the list to confirm the server is working by invoking them directly in terminal.
+
+**How to invoke an MCP tool:**
 
 ```python
-from typing import Optional, Dict, List, Any
-from .server import call_tool
+python -c "
+import asyncio
+import json
+from agent_name.mcp_servers.server_name_mcp import tools
 
+async def test():
+    tool = tools[0]
+    result = await tool.on_invoke_tool(None, json.dumps({}))
+    print(result)
 
-async def [mcp_prefix]_[tool_name](
-    required_param: str,
-    optional_param: Optional[str] = None,
-    another_param: Optional[Dict[str, Any]] = None
-) -> str:
-    """
-    [Tool description from MCP server]
-
-    Args:
-        required_param: [Parameter description from MCP]
-        optional_param: [Parameter description from MCP]
-        another_param: [Parameter description from MCP]
-
-    Returns:
-        Tool result as string
-    """
-    # Build arguments dict with required params
-    arguments = {"required_param": required_param}
-
-    # Add optional params only if provided
-    if optional_param:
-        arguments["optional_param"] = optional_param
-    if another_param:
-        arguments["another_param"] = another_param
-
-    # Call the MCP tool
-    return await call_tool("[mcp-tool-name]", arguments)
-
-
-# IMPORTANT: If MCP server schema shows a single 'data' or 'options' parameter,
-# document the expected dict structure in the docstring based on the examples:
-async def [mcp_prefix]_[tool_with_data_param](data: Dict[str, Any]) -> str:
-    """
-    [Tool description from MCP server]
-
-    Args:
-        data: The data required for the operation. Should contain:
-            - field1 (str, required): Description from MCP examples
-            - field2 (str, optional): Description from MCP examples
-            - field3 (dict, optional): Description from MCP examples
-
-    Example from MCP server:
-        {
-            "field1": "value",
-            "field2": "optional_value",
-            "field3": {"nested": "data"}
-        }
-
-    Returns:
-        Tool result as string
-    """
-    arguments = {"data": data}
-    return await call_tool("[mcp-tool-name]", arguments)
-
-
-# Test - run with: python ./servers/[server_name]/[mcp_prefix]_[tool_name].py
-if __name__ == "__main__":
-    import asyncio
-
-    async def test():
-        print("Testing [mcp_prefix]_[tool_name]...")
-        try:
-            result = await [mcp_prefix]_[tool_name]("test_value")
-            print(f"✓ Success: {str(result)[:200]}...")
-        except Exception as e:
-            print(f"✗ Error: {e}")
-
-    asyncio.run(test())
+asyncio.run(test())
+"
 ```
 
----
-
-### Step 4: Create Package Exports
-
-The `__init__.py` file makes tools easily importable.
-
-**Template (`./servers/[server_name]/__init__.py`):**
+**Example - Testing list_allowed_directories:**
 
 ```python
-"""
-[Server Name] MCP Tools
+python -c "
+import asyncio
+from example_agent.mcp_servers.filesystem_mcp import tools
 
-Progressive disclosure pattern - import only what you need.
-See: https://www.anthropic.com/engineering/code-execution-with-mcp
-"""
+async def test():
+    tool = [t for t in tools if t.name == 'list_allowed_directories'][0]
+    result = await tool.on_invoke_tool(None, '{}')
+    print(result)
 
-# Server management
-from .server import get_server, ensure_connected, call_tool
-
-# Individual tools
-from .[mcp_prefix]_[tool_1] import [mcp_prefix]_[tool_1]
-from .[mcp_prefix]_[tool_2] import [mcp_prefix]_[tool_2]
-from .[mcp_prefix]_[tool_3] import [mcp_prefix]_[tool_3]
-# ... more imports
-
-__all__ = [
-    # Server
-    "get_server",
-    "ensure_connected",
-    "call_tool",
-    # Tools
-    "[mcp_prefix]_[tool_1]",
-    "[mcp_prefix]_[tool_2]",
-    "[mcp_prefix]_[tool_3]",
-    # ... more exports
-]
+asyncio.run(test())
+"
 ```
 
-Also, add nest_asyncio to requirements.txt.
+**Note**: Only execute read-only tools (list, read, get, search). Do not update or create any data.
+
+**Do not come back to the user until you have actually invoked at least 1 tool for each MCP server.**
+
+### Step 5: Add the necessary tools to the agent
+
+To allow the agent to use this new pattern, it needs to have both PersistentShellTool and IPythonInterpreter tools. Make sure to add them to the agent's tools list:
+
+```python
+from agency_swarm.tools import PersistentShellTool, IPythonInterpreter, FileSearchTool
+from agency_swarm import Agent
+from agents import ModelSettings
+from openai.types.shared import Reasoning
+
+agent_name = Agent(
+    name="AgentName",
+    description="Agent description",
+    instructions="./instructions.md",
+    tools=[PersistentShellTool, IPythonInterpreter], # add to tools list
+    files_folder="./files", # make sure toadd to files folder
+    model="gpt-5",
+    model_settings=ModelSettings(
+        reasoning=Reasoning(
+            effort="medium",
+            summary="auto",
+        ),
+    ),
+)
+```
+
+Additionally, don't forget to set the `files_folder` to "./files" which points to the files folder in the agent's directory.
+
+### Step 6: Add Extra Packages
+
+To `requirements.txt`, add the following packages:
 
 ```
 nest_asyncio
+agency_swarm[jupyter]
 ```
 
-This helps the AI agent to use async MCP calls inside IPython without conflicts.
-
----
-
-### Step 5: Test the Implementation
-
-Test the implementation by running specific tool files using the following command:
+After that, install the requirements using the following command:
 
 ```bash
-python ./servers/[server_name]/[mcp_prefix]_[tool_name].py
+pip install -U -r requirements.txt
 ```
 
-Only execute read tools, do not update, or create any data. Make sure you do not make any changes to the user's accounts.
+**Important**: Make sure venv is activated before installing the requirements. If not, check if it exists and activate or create it first.
 
-**Do not come back to the user until you have tested at least 1 tool for each MCP server.**
+### Step 7: Update instructions.md
 
-### Step 6: Update instructions.md
+Update instructions.md for the agent to use the file_search approach. The agent should:
 
-Update instructions.md to reflect the new MCP server implementation. The agent should follow this process:
+1. **Search for tools** using natural language queries in their knowledge base (files folder)
+2. **Load and invoke** only the specific tools needed
 
-1. Discover existing skills in ./mnt/skills folder
-2. Use skill if it matches task
-3. If no skills found, read ONLY necessary tool files
-4. Import and combine tools in IPythonInterpreter
-5. Suggest new skills to be added
+**Example instructions section:**
 
-Keep these instructions short. Don't add mcp usage examples or don't list all mcps. Agent should discover them autonomously.
+````markdown
+## Using MCP Tools
 
-Agent should also minimize token consumption by performing as few tool calls as possible and only reading the necessary tool files to complete the task.
+When you need to access MCP tools:
 
-Perform minimal changes to instructions in order to achieve desired behavior.
+1. Search for relevant tools using natural language queries in your knowledge base by using `file_search` tool
+2. Once you find the tool and its parameter definitions, load and invoke it using `IPythonInterpreter`:
+
+   ```python
+   import json
+   from agent_name.mcp_servers.server_name_mcp import tools
+
+   # Find tool by name from search results
+   tool = [t for t in tools if t.name == 'tool_name'][0]
+
+   # Invoke it (use await directly, not asyncio.run)
+   result = await tool.on_invoke_tool(None, json.dumps({"param": "value"}))
+
+   # Parse the result - MCP returns {"type": "text", "text": "actual content"}
+   result_data = json.loads(result)
+   content = result_data["text"]
+   print(content)
+   ```
+````
+
+- Make sure to replace server_name and agent_name with the actual server name and agent name in real instructions.
+- Keep instructions minimal. Agent discovers tools autonomously via search. Prefer editing existing instructions over creating new ones.
+- Read `.cursor/commands/write-instructions.md` for more details on effective agent instructions.
+- Put the instructions where it makes the most sense in the current instructions.md file. Read it first.
 
 ## Troubleshooting
-
-### Tools not connecting
-
-**Symptom**: `RuntimeError: Could not access MCP session`
-
-**Fix**:
-
-1. Check server.py is correctly implemented
-2. Verify session access: try both `server.session` and `server._client_session`
-3. Ensure `await ensure_connected()` is called before tool use
 
 ### OAuth timeout (Important!)
 
@@ -407,34 +309,25 @@ Perform minimal changes to instructions in order to achieve desired behavior.
 3. Do not add credentials to .gitignore or .dockerignore. Instead, tell the user to ensure their repo is not public.
 4. Make sure to add node install to Dockerfile if using any npm servers, like mcp-remote.
 
----
+### Agent Can't Discover The Tools in File Search
 
-## Quick Checklist
+**Symptom**: Agent tries to check tools manually in code by listing the tools in the `tools` list.
 
-- [ ] Create `./servers/[server_name]/` folder
-- [ ] Implement `server.py` with singleton pattern and discovery in `__main__`
-- [ ] Run `python ./servers/[server_name]/server.py` to discover tools
-- [ ] Create individual tool files using descriptions from MCP server output
-- [ ] All OAuth servers store credentials in `./mnt/mcp-creds` for persistence.
-- [ ] Node install is added to Dockerfile if using any npm servers.
-- [ ] nest_asyncio is added to requirements.txt.
-- [ ] Add `if __name__ == "__main__"` test blocks to each tool file
-- [ ] Create `__init__.py` with exports
-- [ ] Test individual tools: `python ./servers/[server_name]/[mcp_prefix]_[tool].py`
-- [ ] Update instructions.md to ensure the agent can effectively use these tools.
+**Fix**:
 
----
+1. Ensure only 1 files folder is created. When creating a json schema, it must be saved in the same files folder that might already exist.
+2.
 
 ## References
 
 - [Anthropic: Code execution with MCP](https://www.anthropic.com/engineering/code-execution-with-mcp)
 - [Agency Swarm MCP Integration](https://agency-swarm.ai/core-framework/tools/mcp-integration)
 - [Adding MCP Servers to Agents](.cursor/commands/add-mcp.md)
+- [Writing Instructions for Agents](.cursor/commands/write-instructions.md)
 
 ## Final Notes
 
-- You MUST create **all tools** for each MCP server. Tools must never contain placeholders. Each tool must be a production-ready functional code.
-- **CRITICAL**: When MCP schema shows a single `data`, `options`, or similar dict parameter, you MUST document the expected dict structure in the docstring using the examples from the MCP tool description. Never leave dict parameters undocumented.
-- If credentials for testing are missing, notify the user to provide them before starting to create the tools or any MCP server.
-- YOU MUST NEVER SKIP THE TEST. NEVER CREATE A DUMMY TEST CASE WITH ONLY PRINT STATEMENTS OR IMPORTS. ASK THE USER TO PROVIDE THE CREDENTIALS INSTEAD.
-- DO NOT tell the user the task has been completed until you have created **all tools** and tested at least 1 for each MCP server.
+- If credentials for testing are missing, notify the user to provide them before starting this task.
+- YOU MUST NEVER SKIP THE TEST. NEVER RUN A DUMMY TEST CASE WITH ONLY PRINT STATEMENTS OR IMPORTS. TEST AT LEAST 1 TOOL FOR EACH SERVER. ASK THE USER TO PROVIDE THE CREDENTIALS IF NEEDED.
+- DO NOT tell the user the task has been completed until you have tested at least 1 tool for each MCP server.
+- Test tools by running python in terminal using source `venv/bin/activate && python -c "<your test code>"`, instead of creating local python files.
