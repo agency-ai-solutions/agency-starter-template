@@ -34,6 +34,14 @@ For the next turn, take the role of an expert prompt engineer. Your task is to a
 - Works with: [other agents]
 - Used for: [purpose]
 
+# Instructions
+
+## [Task Name]
+
+**[Provide a step-by-step instructions process on how this task should be performed. Use a numbered list. Include specific tools in steps.]**
+
+[...repeat for each task]
+
 # Examples (Optional - if provided by the user)
 
 **1. [Scenario]**  
@@ -46,13 +54,9 @@ Input: "[error or odd case]"
 Process: [detection, recovery, notify]  
 Output: "[error response]"
 
-# Instructions
+# Output Format
 
-## [Task Name]
-
-**[Provide a step-by-step instructions process on how this task should be performed. Use a numbered list. Include specific tools in steps.]**
-
-[...repeat for each task]
+- [Bullet points describing how the agent should respond]
 
 # Additional Notes
 
