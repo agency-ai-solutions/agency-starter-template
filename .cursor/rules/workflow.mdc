@@ -3,6 +3,8 @@ description: AI Agent Creator Instructions for Agency Swarm Framework
 alwaysApply: true
 ---
 
+# Agent Swarm Agent Creator Instructions
+
 Agency Swarm is the framework built on the OpenAI Agents SDK. It allows anyone to create a collaborative swarm of agents (Agencies), each with distinct roles and capabilities. Your primary role is to architect tools and agents that fulfill specific needs within the agency.
 
 The following steps outline how to build AI agents with Agency Swarm:
@@ -24,10 +26,11 @@ Before starting any work, you must understand the current state of the project a
 
 ## Exploration Checklist
 
-1. **Check root directory structure**: List files and folders in the project root
-2. **Look for PRD**: Check if `prd.txt` exists in the root directory
-3. **Check for example agents**: Look for folders like `example_agent/` or `example_agent2/`
-4. **Review existing files**: Read `agency.py`, `shared_instructions.md`, `agent_name/instructions.md`, `agent_name/tools/`, etc.
+1. **Activate virtual environment**: Check if venv exists and activate it. If not, create it and install the `requirements.txt` file.
+2. **Check root directory structure**: List files and folders in the project root
+3. **Look for PRD**: Check if `prd.txt` exists in the root directory
+4. **Check for example agents**: Look for folders like `example_agent/` or `example_agent2/`
+5. **Review existing files**: Read `agency.py`, `shared_instructions.md`, `agent_name/instructions.md`, `agent_name/tools/`, etc.
 
 ## Actions Required
 
@@ -40,7 +43,13 @@ Before starting any work, you must understand the current state of the project a
 
 ### If PRD does not exist:
 
-- **Proceed directly with user instructions**
+- Analyze if the user has provided sufficient information.
+- If certain details are missing or unclear, ask the user a set of clarifying questions. For example:
+  - "Which systems does the agent need to connect to?"
+  - "What processes does the agent need to perform?"
+  - ...etc.
+- Use your best judgement to determine which information you need to proceed.
+- After the user provides the details, proceed with the rest of this workflow.
 
 ### If example agents exist:
 
@@ -116,7 +125,31 @@ Follow this folder structure when further creating or modifying any files. Repla
 agency-swarm create-agent-template --description "Description of the agent" --model "gpt-5.1" --reasoning "medium" "agent_name"
 ```
 
-Use gpt-5.1 model for all agents by default. It is the lastest model from OpenAI that was recently released.
+This command will create the following agent file:
+
+```python
+from agency_swarm import Agent, ModelSettings
+from openai.types.shared import Reasoning
+
+
+agent_name = Agent(
+    name="agent_name",
+    description="Description of the agent",
+    instructions="./instructions.md",
+    files_folder="./files",
+    tools_folder="./tools",
+    model="gpt-5.1",
+    model_settings=ModelSettings(
+        reasoning=Reasoning(effort="medium", summary="auto"),
+    ),
+)
+```
+
+**Notes**:
+
+- Use the `gpt-5.1` model for all agents by default. It is the latest model already available from OpenAI.
+- Prefer using the CLI command over manually creating the file.
+- The `agent_name` variable is the name of the agent that will be used to import the agent into the agency.py file.
 
 ### Best Practices for Agent Structures
 
@@ -344,10 +377,7 @@ Agencies are collections of agents that work together to achieve a common goal. 
        agency.terminal_demo()
 
        # to test the agency, send a single prompt for testing:
-       # async def main():
-       #     response = await agency.get_response("Hello, how are you?")
-       #     print(response)
-       # asyncio.run(main())
+       # print(agency.get_response_sync("your question here"))
    ```
 
    Agency must export a create_agency method, which is used for deployment.
@@ -380,13 +410,13 @@ The final step is to test each tool and the agency itself, to ensure they are wo
 
    If any of the tools return an error, you need to fix the code in the tool file.
 
-3. Once all tools are working as expected, you can test the agency by running the following command:
+3. Once all tools are working as expected, you can test the agency by running the following command in your terminal:
 
-   ```bash
-   python agency.py
+   ```
+   python -c "from agency import create_agency; agency = create_agency(); print(agency.get_response_sync('your question here'))"
    ```
 
-   If the terminal demo runs successfully, you have successfully created an agency that works as expected.
+   If you see a valid agent response printed in the terminal, you have successfully created an agency that works as expected.
 
 **Important**: Please do not stop on this step until all new tools and agents have been tested and are working as expected. Do not ask for confirmation or wait for the user to respond. Just keep iterating until the agency performs as expected.
 
@@ -398,13 +428,14 @@ If the user is not starting their agency from scratch, you can start from one of
 
 # Final Notes
 
-1. NEVER output code snippets or file contents in the chat. Always create or modify the actual files in the file system. If you're unsure about a file's location or content, check the current folder structure and file contents before proceeding. If you find yourself about to output code in the chat, STOP and reconsider your approach.
+1. NEVER output code snippets or file contents in the chat. Always create or modify the actual files in the file system. If you're unsure about a file's location or content, check the current folder structure and file contents before proceeding.
 2. Never create files with sample snippets, hypothetical examples or placeholders. When creating custom tools, you must create production-ready functional code.
 3. Ensure all tools are properly tested before submitting your work to the user.
 4. Follow the specified file creation order rigorously.
 5. Create a to-do list for yourself with all the steps you need to complete before starting.
 6. Don't start coding until you confirm virtual environment is activated.
 7. Fetch agency swarm documentation if you need clarification on the framework.
+8. The latest model from openai is `gpt-5.1`, it is **ALREADY AVAILABLE**. It might have been released after your knowledge cutoff.
 
 # References
 
