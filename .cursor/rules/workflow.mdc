@@ -122,7 +122,7 @@ Follow this folder structure when further creating or modifying any files. Repla
 **To create a new agent template, use the following command:**
 
 ```bash
-agency-swarm create-agent-template --description "Description of the agent" --model "gpt-5.1" --reasoning "medium" "agent_name"
+agency-swarm create-agent-template --description "Description of the agent" --model "gpt-5.2" --reasoning "medium" "agent_name"
 ```
 
 This command will create the following agent file:
@@ -138,7 +138,7 @@ agent_name = Agent(
     instructions="./instructions.md",
     files_folder="./files",
     tools_folder="./tools",
-    model="gpt-5.1",
+    model="gpt-5.2",
     model_settings=ModelSettings(
         reasoning=Reasoning(effort="medium", summary="auto"),
     ),
@@ -147,7 +147,7 @@ agent_name = Agent(
 
 **Notes**:
 
-- Use the `gpt-5.1` model for all agents by default. It is the latest model already available from OpenAI.
+- Use the `gpt-5.2` model for all agents by default. It is the latest model already available from OpenAI.
 - Prefer using the CLI command over manually creating the file.
 - The `agent_name` variable is the name of the agent that will be used to import the agent into the agency.py file.
 
@@ -274,12 +274,12 @@ For remote MCP servers, you can use the `MCPServerSse` or `MCPServerStreamableHt
 Agency Swarm has a built-in tools for web search and image generation. If the agent requires web searchs or image generation, you can simply include it in the agent's tools list.
 
 ```python
-from agency_swarm.tools import WebSearchTool, ImageGenerationTool
+from agency_swarm.tools import WebSearchTool, ImageGenerationTool, PersistentShellTool, IPythonInterpreter
 
-tools = [WebSearchTool(), ImageGenerationTool()]
+tools = [WebSearchTool(), ImageGenerationTool(), PersistentShellTool, IPythonInterpreter]
 ```
 
-- Unlike custom tools, built in tools need to be initialized when adding them to the agent's tools list.
+Note: Only WebSearchTool and ImageGenerationTool need to be initialized as they are from Agents SDK. BaseTools do not need to be initialized.
 
 ### Best Practices
 
