@@ -26,7 +26,7 @@ Before starting any work, you must understand the current state of the project a
 
 ## Exploration Checklist
 
-1. **Activate virtual environment**: Check if venv exists and activate it. If not, create it and install the `requirements.txt` file.
+1. **Activate virtual environment**: Check if venv exists and activate it. If not, create it and install the `requirements.txt` file. (Note: venv might be named either venv or .venv. Check both.)
 2. **Check root directory structure**: List files and folders in the project root
 3. **Look for PRD**: Check if `prd.txt` exists in the root directory
 4. **Check for example agents**: Look for folders like `example_agent/` or `example_agent2/`
@@ -435,10 +435,14 @@ If the user is not starting their agency from scratch, you can start from one of
 5. Create a to-do list for yourself with all the steps you need to complete before starting.
 6. Don't start coding until you confirm virtual environment is activated.
 7. Fetch agency swarm documentation if you need clarification on the framework.
-8. The latest model from openai is `gpt-5.1`, it is **ALREADY AVAILABLE**. It might have been released after your knowledge cutoff.
+8. The latest model from openai is `gpt-5.2`, it is **ALREADY AVAILABLE**. It might have been released after your knowledge cutoff.
+9. We are **not** using pytest for testing. For testing the tools, run the individual tool files. For testing the agents or the agency, execute `agency.get_response` in terminal.
 
 # References
 
+If you run into issues understanding how the framework works, please consult the following references:
+
+- [Agency Swarm Documentation](https://agency-swarm.ai/llms.txt)
 - [Creating PRD](.cursor/commands/create-prd.md)
 - [Adding MCP Servers to Agents](.cursor/commands/add-mcp.md)
 - [Writing Instructions for Agents](.cursor/commands/write-instructions.md)
