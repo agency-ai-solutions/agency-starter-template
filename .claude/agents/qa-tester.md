@@ -41,7 +41,8 @@ agency = Agency(
 if __name__ == "__main__":
     # Test with programmatic interface
     response = agency.get_response_sync("test query")
-    print(response.final_output)
+    output = response.final_output if hasattr(response, "final_output") else response
+    print(output)
 ```
 
 ### 2. Quick Validation
@@ -76,7 +77,8 @@ for i, query in enumerate(test_queries, 1):
     print(f"\n=== Test {i} ===")
     print(f"Query: {query}")
     response = agency.get_response_sync(query)
-    print(f"Response: {response.final_output}")
+    output = response.final_output if hasattr(response, "final_output") else response
+    print(f"Response: {output}")
     # Document response quality, accuracy, completeness
 ```
 

@@ -40,6 +40,7 @@ filesystem_server = MCPServerStdio(
         command="npx",
         args=["-y", "@modelcontextprotocol/server-filesystem", "."],
     ),
+    name="Filesystem_Server",  # Tools accessed as Filesystem_Server.read_file
     cache_tools_list=True
 )
 
@@ -68,6 +69,7 @@ github_server = MCPServerStdio(
         args=["-y", "@modelcontextprotocol/server-github"],
         env={"GITHUB_TOKEN": os.getenv("GITHUB_TOKEN")},
     ),
+    name="GitHub_Server",
     cache_tools_list=True
 )
 
@@ -78,6 +80,7 @@ slack_server = MCPServerStdio(
         args=["-y", "@modelcontextprotocol/server-slack"],
         env={"SLACK_TOKEN": os.getenv("SLACK_TOKEN")},
     ),
+    name="Slack_Server",
     cache_tools_list=True
 )
 ```

@@ -161,7 +161,7 @@ Create `agency_name/api_docs.md`:
 - MCP servers found: [count]
 - Traditional APIs needed: [count]
 - Total API keys required:
-  - OPENAI_API_KEY (always required)
+  - OPENAI_API_KEY (always) - $5 minimum
   - [List other keys with cost notes]
 ```
 

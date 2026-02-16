@@ -217,18 +217,19 @@ if __name__ == "__main__":
 
 Remember, each tool code snippet you create must be IMMIDIATELY ready to use by the user. It must not contain any mocks, placeholders or hypothetical examples.
 
-#### Agency Context (Shared State)
+#### Agency Context (formerly Shared State)
 
 Agency context lets your tools and agents share data without passing it in conversation messages.
 
 ```python
 from agency_swarm.tools import BaseTool
+from pydantic import Field
 
 class MyTool(BaseTool):
     value: str = Field(..., description="The value to store in the context")
     def run(self):
-        self._context.set("my_key", self.value)
-        data = self._context.get("my_key", "default")
+        self.context.set("my_key", self.value)
+        data = self.context.get("my_key", "default")
         return data
 ```
 
@@ -249,15 +250,15 @@ Best practices:
 Alternatively to creating custom tools, you can use special MCP servers which already contain predefined tools. In this case, you don't need to create custom tool files for the same functionality or add them to the PRD. You can use MCPs interchangeably with custom tools
 
 ```python
-from agents.mcp import MCPServerStdio
+from agents.mcp.server import MCPServerStdio, MCPServerStdioParams
 
 filesystem_server = MCPServerStdio(
+    MCPServerStdioParams(
+        command="npx",
+        args=["-y", "@modelcontextprotocol/server-filesystem", "."],
+    ),
     # This name determines how the agent accesses the tools (e.g., Filesystem_Server.list_files)
     name="Filesystem_Server",
-    params={
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
-    },
     cache_tools_list=True
 )
 # Attach this server to your Agent via the mcp_servers list:
