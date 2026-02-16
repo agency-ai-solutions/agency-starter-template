@@ -218,9 +218,11 @@ class QueryDatabase(BaseTool):
         context = query_database(self.question)
 
         # Store in agency context for other tools to use
-        assert self.context is not None
-        self.context.set('context', context)
-        self.context.set('query_timestamp', datetime.now())
+        agency_context = self.context
+        if agency_context is None:
+            raise RuntimeError("Agency context is unavailable.")
+        agency_context.set('context', context)
+        agency_context.set('query_timestamp', datetime.now())
 
         return "Context retrieved and stored successfully."
 ```
@@ -234,9 +236,11 @@ class GenerateReport(BaseTool):
 
     def run(self):
         # Get data from agency context
-        assert self.context is not None
-        context = self.context.get('context')
-        timestamp = self.context.get('query_timestamp')
+        agency_context = self.context
+        if agency_context is None:
+            raise RuntimeError("Agency context is unavailable.")
+        context = agency_context.get('context')
+        timestamp = agency_context.get('query_timestamp')
 
         if not context:
             raise ValueError("No context found. Please run QueryDatabase first.")
@@ -254,16 +258,18 @@ class Action2(BaseTool):
 
     def run(self):
         # Check if previous action completed
-        assert self.context is not None
-        if self.context.get("action_1_complete") is not True:
+        agency_context = self.context
+        if agency_context is None:
+            raise RuntimeError("Agency context is unavailable.")
+        if agency_context.get("action_1_complete") is not True:
             raise ValueError("Please complete Action1 first before proceeding.")
 
         # Perform action
         result = self.perform_action(self.input)
 
         # Mark this action as complete
-        self.context.set("action_2_complete", True)
-        self.context.set("action_2_result", result)
+        agency_context.set("action_2_complete", True)
+        agency_context.set("action_2_result", result)
 
         return "Action 2 completed successfully."
 ```
