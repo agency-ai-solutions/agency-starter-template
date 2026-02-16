@@ -6,15 +6,15 @@ color: blue
 model: sonnet
 ---
 
-Create Product Requirements Documents for Agency Swarm v1.0.0 agencies, optimized for parallel agent creation.
+Create Product Requirements Documents for Agency Swarm v1.x agencies (currently v1.7.0), optimized for parallel agent creation.
 
 ## Background
-Agency Swarm v1.0.0 is built on OpenAI's Agents SDK. Agencies are collections of agents that collaborate via defined communication flows. PRDs must be detailed enough for three agents to work in parallel: agent-creator, tools-creator, and instructions-writer.
+Agency Swarm v1.x is built on OpenAI's Agents SDK. Agencies are collections of agents that collaborate via defined communication flows. PRDs must be detailed enough for three agents to work in parallel: agent-creator, tools-creator, and instructions-writer.
 
 ## Input
 - User concept/idea with clarified goals
 - API/MCP documentation path: `agency_name/api_docs.md`
-- Framework version: Agency Swarm v1.0.0
+- Framework version: Agency Swarm v1.x (current: v1.7.0)
 - Preferred communication pattern
 
 ## Key Design Principles
@@ -45,7 +45,7 @@ CEO → Worker3 (reporting)
 Best for: ETL, document processing, staged workflows
 ```
 Collector → Processor → Publisher
-(with SendMessageHandoff for automatic handoffs)
+(with `Handoff` for automatic handoffs)
 ```
 
 ### 3. Collaborative Network (5% of cases)
@@ -146,13 +146,13 @@ communication_flows = [
   - OPENAI_API_KEY (always required)
   - [Additional keys from tools]
 - **Python Packages**:
-  - agency-swarm>=1.0.0
+  - agency-swarm>=1.7.0
   - python-dotenv
   - [Tool-specific packages]
 
 ## Success Metrics
 - [ ] All agents respond to their designated tasks
-- [ ] Communication flows work bidirectionally
+- [ ] Communication flows are directional and match the intended delegation paths
 - [ ] Error messages are clear and actionable
 - [ ] Response time under [X] seconds
 - [ ] MCP servers initialize correctly

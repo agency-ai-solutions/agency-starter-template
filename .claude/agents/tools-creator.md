@@ -6,11 +6,11 @@ color: orange
 model: sonnet
 ---
 
-Implement production-ready Agency Swarm v1.0.0 tools, strongly preferring MCP servers, and test each tool individually.
+Implement production-ready Agency Swarm v1.x tools (currently v1.7.0), strongly preferring MCP servers, and test each tool individually.
 
 ## Background
 
-Agency Swarm v1.0.0 strongly prefers MCP (Model Context Protocol) servers. MCP servers are integrated directly into agent files, not as separate tools. Runs AFTER agent-creator and instructions-writer complete.
+Agency Swarm v1.x strongly prefers MCP (Model Context Protocol) servers. Local MCP servers are integrated directly into agent files via `mcp_servers`; hosted MCP servers can be attached as tools. Runs AFTER agent-creator and instructions-writer complete.
 
 ## Input
 
@@ -31,16 +31,15 @@ Read the API docs to find which MCP servers are available for the required tools
 For each agent that needs MCP tools, MODIFY the agent's .py file:
 
 ```python
-from agency_swarm import Agent
-from agency_swarm.tools.mcp import MCPServerStdio
+from agents.mcp.server import MCPServerStdio, MCPServerStdioParams
+from agency_swarm import Agent, ModelSettings
 
 # Define MCP server
 filesystem_server = MCPServerStdio(
-    name="Filesystem_Server",  # Tools accessed as Filesystem_Server.read_file
-    params={
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
-    },
+    MCPServerStdioParams(
+        command="npx",
+        args=["-y", "@modelcontextprotocol/server-filesystem", "."],
+    ),
     cache_tools_list=True
 )
 
@@ -51,10 +50,10 @@ agent_name = Agent(
     instructions="./instructions.md",
     tools_folder="./tools",
     mcp_servers=[filesystem_server],  # ADD THIS LINE
+    model="gpt-5.2",
     model_settings=ModelSettings(
-        model="gpt-4o",
         temperature=0.5,
-        max_completion_tokens=25000,
+        max_tokens=25000,
     ),
 )
 ```
@@ -64,23 +63,21 @@ agent_name = Agent(
 ```python
 # GitHub Server
 github_server = MCPServerStdio(
-    name="GitHub_Server",
-    params={
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-github"],
-        "env": {"GITHUB_TOKEN": os.getenv("GITHUB_TOKEN")},
-    },
+    MCPServerStdioParams(
+        command="npx",
+        args=["-y", "@modelcontextprotocol/server-github"],
+        env={"GITHUB_TOKEN": os.getenv("GITHUB_TOKEN")},
+    ),
     cache_tools_list=True
 )
 
 # Slack Server (if available)
 slack_server = MCPServerStdio(
-    name="Slack_Server",
-    params={
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-slack"],
-        "env": {"SLACK_TOKEN": os.getenv("SLACK_TOKEN")},
-    },
+    MCPServerStdioParams(
+        command="npx",
+        args=["-y", "@modelcontextprotocol/server-slack"],
+        env={"SLACK_TOKEN": os.getenv("SLACK_TOKEN")},
+    ),
     cache_tools_list=True
 )
 ```
@@ -90,7 +87,7 @@ slack_server = MCPServerStdio(
 You can use the following built-in tool when agent requires web searchs:
 
 ```python
-from agents.tool import WebSearchTool
+from agency_swarm import WebSearchTool
 
 tools = [WebSearchTool()]
 ```
@@ -190,39 +187,40 @@ class EmailSender(BaseTool):
     recipient: EmailStr = Field(..., description="Valid email address.")
 ```
 
-### 4. Use Shared State for Flow Control
+### 4. Use Agency Context for Flow Control
 
-Shared state is a centralized dictionary accessible by all tools and agents. Use it to share data without parameter passing.
+Agency context (formerly called shared state) is a centralized store accessible by all tools and agents. Use it to share data without parameter passing.
 
-#### Shared State Key Concepts
+#### Agency Context Key Concepts
 
-- **Shared State**: All tools within an agency share a Python dictionary (`self._shared_state`)
+- **Agency Context**: BaseTools access shared context via `self.context`; FunctionTools use `ctx.context`
 - **Data Sharing**: Tools can exchange data without explicit parameter passing
-- **Flow Control**: Use shared state to enforce tool execution order
-- **Note**: Shared state only works when tools are deployed with agents (not as separate APIs)
+- **Flow Control**: Use agency context to enforce tool execution order
+- **Note**: Agency context only works when tools are deployed with agents (not as separate APIs)
 
-#### Common Shared State Patterns
+#### Common Agency Context Patterns
 
 1. **Data Collection → Processing**: Tool A collects data, Tool B processes it
 2. **Multi-Step Workflows**: Each tool marks its completion for the next
 3. **Session Management**: Store user session data across tools
-4. **Cache Results**: Avoid redundant API calls by caching in shared state
+4. **Cache Results**: Avoid redundant API calls by caching in agency context
 5. **Error Context**: Store error details for debugging across tools
 
 **Setting values**:
 
 ```python
 class QueryDatabase(BaseTool):
-    """Retrieves data and stores it in shared state."""
+    """Retrieves data and stores it in agency context."""
     question: str = Field(..., description="The query to execute.")
 
     def run(self):
         # Fetch data
         context = query_database(self.question)
 
-        # Store in shared state for other tools to use
-        self._shared_state.set('context', context)
-        self._shared_state.set('query_timestamp', datetime.now())
+        # Store in agency context for other tools to use
+        assert self.context is not None
+        self.context.set('context', context)
+        self.context.set('query_timestamp', datetime.now())
 
         return "Context retrieved and stored successfully."
 ```
@@ -231,13 +229,14 @@ class QueryDatabase(BaseTool):
 
 ```python
 class GenerateReport(BaseTool):
-    """Generates report using data from shared state."""
+    """Generates report using data from agency context."""
     format: str = Field(..., description="Report format")
 
     def run(self):
-        # Get data from shared state
-        context = self._shared_state.get('context')
-        timestamp = self._shared_state.get('query_timestamp')
+        # Get data from agency context
+        assert self.context is not None
+        context = self.context.get('context')
+        timestamp = self.context.get('query_timestamp')
 
         if not context:
             raise ValueError("No context found. Please run QueryDatabase first.")
@@ -255,15 +254,16 @@ class Action2(BaseTool):
 
     def run(self):
         # Check if previous action completed
-        if self._shared_state.get("action_1_complete") != True:
+        assert self.context is not None
+        if self.context.get("action_1_complete") is not True:
             raise ValueError("Please complete Action1 first before proceeding.")
 
         # Perform action
         result = self.perform_action(self.input)
 
         # Mark this action as complete
-        self._shared_state.set("action_2_complete", True)
-        self._shared_state.set("action_2_result", result)
+        self.context.set("action_2_complete", True)
+        self.context.set("action_2_result", result)
 
         return "Action 2 completed successfully."
 ```
@@ -316,7 +316,7 @@ class DataProcessor(BaseTool):
 3. **Implement MCP Servers** (CRITICAL):
 
    - Open the agent's .py file
-   - Import MCPServerStdio at the top
+   - Import `MCPServerStdio` and `MCPServerStdioParams` from `agents.mcp.server`
    - Define the MCP server instance
    - Add `mcp_servers=[server_instance]` to Agent()
    - Test that the server initializes
@@ -344,8 +344,8 @@ class DataProcessor(BaseTool):
      - Add chain-of-thought for complex tools
      - Provide helpful error messages
      - Use specific types (Literal, EmailStr)
-     - Implement shared state for data passing between tools
-     - Add flow validation using shared state
+     - Implement agency context for data passing between tools
+     - Add flow validation using agency context
      - Include proper test cases
    - If not working, fix the issue
    - Keep iterating until all tools pass tests
@@ -391,6 +391,6 @@ Report back:
   - Chain-of-thought tools: [count]
   - Tools with type restrictions: [count]
   - Tools with helpful error hints: [count]
-  - Shared state usage: [tools using it]
+  - Agency context usage: [tools using it]
   - All tools have test cases: Yes/No
 - Dependencies added to requirements.txt

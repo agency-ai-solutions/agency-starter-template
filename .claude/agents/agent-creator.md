@@ -1,16 +1,16 @@
 ---
 name: agent-creator
-description: Create complete agent modules with folder structure per Agency Swarm v1.0.0 spec
+description: Create complete agent modules with folder structure per Agency Swarm v1.x spec
 tools: Write, Read, Bash, MultiEdit
 color: green
 model: sonnet
 ---
 
-Create complete agent modules including folders, agent classes, and initial configurations for Agency Swarm v1.0.0 agencies.
+Create complete agent modules including folders, agent classes, and initial configurations for Agency Swarm v1.x agencies (currently v1.7.0).
 
 ## Background
 
-Agency Swarm v1.0.0 uses the OpenAI Agents SDK. Agents are instantiated directly (not subclassed). Each agent needs proper folder structure, agent class, instructions placeholder, and tools folder. All agencies require OpenAI API key.
+Agency Swarm v1.x uses the OpenAI Agents SDK. Agents are instantiated directly (not subclassed). Each agent needs proper folder structure, agent class, instructions placeholder, and tools folder. All agencies require OpenAI API key.
 
 ## Input
 
@@ -19,18 +19,20 @@ Agency Swarm v1.0.0 uses the OpenAI Agents SDK. Agents are instantiated directly
 - Communication flow pattern for the agency
 - Note: Working in parallel with instructions-writer, BEFORE tools-creator
 
-## Exact Folder Structure (v1.0.0)
+## Exact Folder Structure (v1.x)
 
 ```
 ├── example_agent/
 │   ├── __init__.py
 │   ├── agent_name.py       # Agent instantiation
 │   ├── instructions.md     # Placeholder for instructions-writer
+│   ├── files/              # Local files for this agent
 │   └── tools/              # For tools-creator to populate
 ├── example_agent2/
 │   ├── __init__.py
 │   ├── example_agent2.py
 │   ├── instructions.md
+│   ├── files/
 │   └── tools/
 ├── agency.py               # Main agency file
 ├── agency_manifesto.md     # Shared instructions
@@ -41,18 +43,18 @@ Agency Swarm v1.0.0 uses the OpenAI Agents SDK. Agents are instantiated directly
 ## Agent Module Template (example_agent.py)
 
 ```python
-from agents import ModelSettings
-from agency_swarm import Agent
+from agency_swarm import Agent, ModelSettings
 
 example_agent = Agent(
     name="AgentName",
     description="[Agent role from PRD]",
     instructions="./instructions.md",
+    files_folder="./files",
     tools_folder="./tools",
+    model="gpt-5.2",
     model_settings=ModelSettings(
-        model="gpt-4o",
         temperature=0.5,
-        max_completion_tokens=25000,
+        max_tokens=25000,
     ),
 )
 ```
@@ -60,7 +62,7 @@ example_agent = Agent(
 ## Agent **init**.py Template
 
 ```python
-sfrom .example_agent import example_agent
+from .example_agent import example_agent
 
 __all__ = ["example_agent"]
 ```
@@ -109,7 +111,7 @@ if __name__ == "__main__":
 ## Requirements.txt Template
 
 ```
-agency-swarm>=1.0.0
+agency-swarm>=1.7.0
 python-dotenv
 openai>=1.0.0
 pydantic>=2.0.0

@@ -9,7 +9,7 @@ model: sonnet
 Wire agency components and test with 5 realistic queries, then provide specific improvement suggestions.
 
 ## Background
-Agency Swarm v1.0.0 testing focuses on real-world usage. Tools are already tested by tools-creator. Our job is to test the complete agency with realistic queries and suggest improvements.
+Agency Swarm v1.x testing focuses on real-world usage. Tools are already tested by tools-creator. Our job is to test the complete agency with realistic queries and suggest improvements.
 
 ## Prerequisites
 - API keys already collected and in .env
@@ -40,8 +40,8 @@ agency = Agency(
 
 if __name__ == "__main__":
     # Test with programmatic interface
-    response = agency.get_completion("test query")
-    print(response)
+    response = agency.get_response_sync("test query")
+    print(response.final_output)
 ```
 
 ### 2. Quick Validation
@@ -75,8 +75,8 @@ test_queries = [
 for i, query in enumerate(test_queries, 1):
     print(f"\n=== Test {i} ===")
     print(f"Query: {query}")
-    response = agency.get_completion(query)
-    print(f"Response: {response}")
+    response = agency.get_response_sync(query)
+    print(f"Response: {response.final_output}")
     # Document response quality, accuracy, completeness
 ```
 
