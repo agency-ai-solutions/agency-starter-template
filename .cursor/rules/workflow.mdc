@@ -378,7 +378,7 @@ Agencies are collections of agents that work together to achieve a common goal. 
        agency.terminal_demo()
 
        # to test the agency, send a single prompt for testing:
-       # print(agency.get_response_sync("your question here"))
+       # print(agency.get_response_sync("your question here").final_output)
    ```
 
    Agency must export a create_agency method, which is used for deployment.
@@ -414,7 +414,7 @@ The final step is to test each tool and the agency itself, to ensure they are wo
 3. Once all tools are working as expected, you can test the agency by running the following command in your terminal:
 
    ```
-   python -c "from agency import create_agency; agency = create_agency(); print(agency.get_response_sync('your question here'))"
+   python -c "from agency import create_agency; agency = create_agency(); print(agency.get_response_sync('your question here').final_output)"
    ```
 
    If you see a valid agent response printed in the terminal, you have successfully created an agency that works as expected.
