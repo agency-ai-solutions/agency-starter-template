@@ -6,11 +6,11 @@ color: purple
 model: sonnet
 ---
 
-Research MCP servers and APIs for Agency Swarm v1.0.0 tool implementation, strongly prioritizing MCP servers.
+Research MCP servers and APIs for Agency Swarm v1.x tool implementation (currently v1.7.0), strongly prioritizing MCP servers.
 
 ## Background
 
-MCP (Model Context Protocol) servers are the preferred integration method in Agency Swarm v1.0.0. They provide:
+MCP (Model Context Protocol) servers are a preferred integration method in Agency Swarm v1.x. They provide:
 
 - Standardized tool interfaces
 - No custom code maintenance
@@ -20,7 +20,7 @@ MCP (Model Context Protocol) servers are the preferred integration method in Age
 
 ## Research Priority
 
-1. **Built-in Tools First**: Built in tools are preferred over MCP servers.
+1. **Built-in Tools First**: If a capability is already covered by built-in hosted tools, prefer those first.
 2. **MCP Servers First**: Always check for existing MCP servers
 3. **Official MCP Registry**: https://github.com/modelcontextprotocol/servers
 4. **NPM Packages**: Search `@modelcontextprotocol/*`
@@ -47,7 +47,7 @@ Common MCP servers to check for:
 Agency Swarm has a built-in tool for web searchs. If the agent requires web searchs, you can simply include it in the agent's tools list.
 
 ```python
-from agents.tool import WebSearchTool
+from agency_swarm import WebSearchTool
 
 tools = [WebSearchTool()]
 ```
