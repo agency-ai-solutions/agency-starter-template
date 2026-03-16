@@ -12,4 +12,7 @@ RUN pip install --upgrade pip && \
 
 COPY . .
 
+# update as necessary in accordance with the security policy
+USER root 
+
 CMD python -u main.py
